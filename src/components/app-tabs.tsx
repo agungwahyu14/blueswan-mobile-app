@@ -1,33 +1,118 @@
-import { NativeTabs } from 'expo-router/unstable-native-tabs';
-import React from 'react';
-import { useColorScheme } from 'react-native';
+import { Tabs } from "expo-router";
+import { SymbolView } from "expo-symbols";
+import React from "react";
+import { useColorScheme } from "react-native";
 
-import { Colors } from '@/constants/theme';
+import { Colors } from "@/constants/theme";
 
 export default function AppTabs() {
   const scheme = useColorScheme();
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = Colors[scheme ?? "light"];
 
   return (
-    <NativeTabs
-      backgroundColor={colors.background}
-      indicatorColor={colors.backgroundElement}
-      labelStyle={{ selected: { color: colors.text } }}>
-      <NativeTabs.Trigger name="index">
-        <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon
-          src={require('@/assets/images/tabIcons/home.png')}
-          renderingMode="template"
-        />
-      </NativeTabs.Trigger>
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: colors.accent,
+        tabBarInactiveTintColor: colors.primary,
+        tabBarStyle: {
+          backgroundColor: "#FFFFFF",
+          borderTopColor: colors.backgroundElement,
+          borderTopWidth: 1,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: "600",
+        },
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: "Destinations",
+          tabBarIcon: ({ color, size }) => (
+            <SymbolView
+              name="map.fill"
+              size={size}
+              tintColor={color}
+              type="hierarchical"
+            />
+          ),
+        }}
+      />
 
-      <NativeTabs.Trigger name="explore">
-        <NativeTabs.Trigger.Label>Explore</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon
-          src={require('@/assets/images/tabIcons/explore.png')}
-          renderingMode="template"
-        />
-      </NativeTabs.Trigger>
-    </NativeTabs>
+      <Tabs.Screen
+        name="explore"
+        options={{
+          title: "Tours",
+          tabBarIcon: ({ color, size }) => (
+            <SymbolView
+              name="camera.metering.multispot"
+              size={size}
+              tintColor={color}
+              type="hierarchical"
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="bookings"
+        options={{
+          title: "Bookings",
+          tabBarIcon: ({ color, size }) => (
+            <SymbolView
+              name="calendar.badge.checkmark"
+              size={size}
+              tintColor={color}
+              type="hierarchical"
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color, size }) => (
+            <SymbolView
+              name="person.crop.circle.fill"
+              size={size}
+              tintColor={color}
+              type="hierarchical"
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="about-us"
+        options={{
+          href: null, // Hide from tabs
+        }}
+      />
+
+      <Tabs.Screen
+        name="welcome"
+        options={{
+          href: null, // Hide from tabs
+        }}
+      />
+
+      <Tabs.Screen
+        name="login"
+        options={{
+          href: null, // Hide from tabs
+        }}
+      />
+
+      <Tabs.Screen
+        name="register"
+        options={{
+          href: null, // Hide from tabs
+        }}
+      />
+    </Tabs>
   );
 }

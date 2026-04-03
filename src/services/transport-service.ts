@@ -1,6 +1,6 @@
 import type {
     TransportDetailResponse,
-    TransportsResponse
+    TransportsResponse,
 } from "@/types/transport";
 import { apiClient } from "./api-client";
 

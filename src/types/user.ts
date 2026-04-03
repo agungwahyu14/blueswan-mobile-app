@@ -1,16 +1,19 @@
 export interface User {
   id: string;
+  name: string;
   email: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber?: string;
-  avatarUrl?: string;
-  dateOfBirth?: string;
+  phone_number?: string;
   nationality?: string;
-  passportNumber?: string;
-  preferences: UserPreferences;
-  createdAt: string;
-  updatedAt: string;
+  date_of_birth?: string;
+  is_verified: boolean;
+  role?: {
+    id: number;
+    name: string;
+  };
+  avatarUrl?: string;
+  preferences?: UserPreferences;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface UserPreferences {
@@ -25,12 +28,11 @@ export interface UserPreferences {
 }
 
 export interface UpdateUserPayload {
-  firstName?: string;
-  lastName?: string;
-  phoneNumber?: string;
-  dateOfBirth?: string;
+  name?: string;
+  email?: string;
+  phone_number?: string;
   nationality?: string;
-  passportNumber?: string;
+  date_of_birth?: string;
   preferences?: Partial<UserPreferences>;
 }
 

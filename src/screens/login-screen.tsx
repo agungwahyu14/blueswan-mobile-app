@@ -37,7 +37,7 @@ export const LoginScreen: React.FC = () => {
 
     try {
       await login(email, password);
-      router.replace("/");
+      router.replace("/home");
     } catch (err) {
       Alert.alert(
         "Login Failed",
@@ -51,7 +51,7 @@ export const LoginScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}

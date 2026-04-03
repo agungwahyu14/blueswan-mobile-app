@@ -1,103 +1,379 @@
-import { useExploreStore } from "@/store/explore-store";
-import type { TourPackage } from "@/types/tour";
-import React, { useEffect } from "react";
+import { categoryService } from "@/services/category-service";
+import { destinationService } from "@/services/destination-service";
+import { packageService } from "@/services/package-service";
+import type { Category } from "@/types/category";
+import type { Destination } from "@/types/destination";
+import type { Package } from "@/types/package";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
 import {
-    FlatList,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 interface TourCardProps {
-  tour: TourPackage;
-  onPress: (tour: TourPackage) => void;
+  tour: Package;
+  onPress: (tour: Package) => void;
 }
 
-const TourCard: React.FC<TourCardProps> = ({ tour, onPress }) => (
-  <TouchableOpacity
-    style={styles.card}
-    onPress={() => onPress(tour)}
-    activeOpacity={0.8}
-  >
-    <Image
-      source={{ uri: tour.imageUrls[0] }}
-      style={styles.cardImage}
-      resizeMode="cover"
-    />
-    <View style={styles.cardContent}>
-      <Text style={styles.cardTitle} numberOfLines={2}>
-        {tour.title}
-      </Text>
-      <Text style={styles.destination} numberOfLines={1}>
-        📍 {tour.destinationName}
-      </Text>
+const TourCard: React.FC<TourCardProps> = ({ tour, onPress }) => {
+  const primaryPhoto = tour.photos.find((p) => p.is_primary) || tour.photos[0];
+  const fitnessIcon =
+    tour.fitness_level === "easy"
+      ? "🟢"
+      : tour.fitness_level === "moderate"
+        ? "🟡"
+        : "🔴";
 
-      <View style={styles.detailsRow}>
-        <Text style={styles.duration}>🕒 {tour.duration} days</Text>
-        <Text style={styles.difficulty}>
-          {tour.difficulty === "easy"
-            ? "🟢"
-            : tour.difficulty === "moderate"
-              ? "🟡"
-              : "🔴"}{" "}
-          {tour.difficulty}
+  return (
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => onPress(tour)}
+      activeOpacity={0.8}
+    >
+      <Image
+        source={{ uri: primaryPhoto?.photo_url }}
+        style={styles.cardImage}
+        resizeMode="cover"
+      />
+      <View style={styles.cardContent}>
+        <Text style={styles.cardTitle} numberOfLines={2}>
+          {tour.name}
         </Text>
-      </View>
-
-      <View style={styles.cardFooter}>
-        <View style={styles.ratingContainer}>
-          <Text style={styles.ratingText}>⭐ {tour.rating.toFixed(1)}</Text>
-          <Text style={styles.reviewCount}>({tour.reviewCount})</Text>
-        </View>
-        <View style={styles.priceContainer}>
-          <Text style={styles.priceLabel}>From</Text>
-          <Text style={styles.price}>
-            {tour.currency} {tour.price.toLocaleString()}
+        <View style={styles.destinationRow}>
+          <Ionicons name="location" size={14} color="#666" />
+          <Text style={styles.destination} numberOfLines={1}>
+            {tour.destination.name}
           </Text>
         </View>
-      </View>
-    </View>
-  </TouchableOpacity>
-);
 
-export const ToursScreen: React.FC = () => {
-  const { featuredTours, isLoadingTours, fetchFeaturedTours } =
-    useExploreStore();
+        <View style={styles.detailsRow}>
+          <View style={styles.detailItem}>
+            <Ionicons name="time-outline" size={14} color="#666" />
+            <Text style={styles.duration}>
+              {tour.duration_days}D{tour.duration_nights}N
+            </Text>
+          </View>
+          <View style={styles.detailItem}>
+            <Text style={styles.fitnessIcon}>{fitnessIcon}</Text>
+            <Text style={styles.difficulty}>{tour.fitness_level}</Text>
+          </View>
+          <View style={styles.detailItem}>
+            <Ionicons name="people-outline" size={14} color="#666" />
+            <Text style={styles.participantText}>
+              {tour.min_participant}-{tour.max_participant}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.cardFooter}>
+          <View style={styles.ratingContainer}>
+            <Ionicons name="star" size={14} color="#FFB800" />
+            <Text style={styles.ratingText}>
+              {tour.average_rating.toFixed(1)}
+            </Text>
+            <Text style={styles.reviewCount}>({tour.total_review})</Text>
+          </View>
+          <View style={styles.priceContainer}>
+            <Text style={styles.priceLabel}>Mulai dari</Text>
+            <Text style={styles.price}>
+              Rp {tour.price_idr.toLocaleString("id-ID")}
+            </Text>
+          </View>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
+interface ToursScreenProps {
+  showBackButton?: boolean;
+}
+
+export const ToursScreen: React.FC<ToursScreenProps> = ({
+  showBackButton = false,
+}) => {
+  const router = useRouter();
+  const [packages, setPackages] = useState<Package[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [destinations, setDestinations] = useState<Destination[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [selectedDestinationId, setSelectedDestinationId] = useState<
+    string | undefined
+  >();
+  const [selectedCategoryId, setSelectedCategoryId] = useState<
+    string | undefined
+  >();
+
+  // Fetch categories and destinations on mount
+  useEffect(() => {
+    const fetchFilters = async () => {
+      try {
+        console.log("\n🔍 Fetching filters...\n");
+        const [categoriesRes, destinationsRes] = await Promise.all([
+          categoryService.getCategories(),
+          destinationService.getDestinations(),
+        ]);
+
+        console.log("📦 Categories:", categoriesRes.data.length, "items");
+        categoriesRes.data.forEach((cat, idx) =>
+          console.log(
+            `  ${idx + 1}. ${cat.name} (${cat.package_count} packages)`,
+          ),
+        );
+
+        console.log("\n🌍 Destinations:", destinationsRes.data.length, "items");
+        destinationsRes.data.forEach((dest, idx) =>
+          console.log(
+            `  ${idx + 1}. ${dest.name} (${dest.package_count} packages)`,
+          ),
+        );
+
+        setCategories(categoriesRes.data);
+        setDestinations(destinationsRes.data);
+        console.log("\n✅ Filters loaded successfully\n");
+      } catch (err) {
+        console.error("❌ Error fetching filters:", err);
+      }
+    };
+    fetchFilters();
+  }, []);
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const fetchPackages = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const params: {
+        search?: string;
+        destination_id?: string;
+        category_id?: string;
+      } = {};
+
+      if (debouncedSearch && debouncedSearch.trim()) {
+        params.search = debouncedSearch.trim();
+      }
+      if (selectedDestinationId) {
+        params.destination_id = selectedDestinationId;
+      }
+      if (selectedCategoryId) {
+        params.category_id = selectedCategoryId;
+      }
+
+      console.log("\n📦 Fetching packages with filters:", {
+        search: params.search || "none",
+        destination: params.destination_id || "none",
+        category: params.category_id || "none",
+      });
+
+      const response = await packageService.getPackages(params);
+
+      console.log(`✅ Found ${response.data.length} packages\n`);
+      setPackages(response.data);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Gagal memuat paket wisata";
+      setError(errorMessage);
+      console.error("❌ Error fetching packages:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [debouncedSearch, selectedDestinationId, selectedCategoryId]);
 
   useEffect(() => {
-    fetchFeaturedTours();
-  }, [fetchFeaturedTours]);
+    fetchPackages();
+  }, [fetchPackages]);
 
-  const handleTourPress = (tour: TourPackage) => {
-    // Navigate to tour details
-    console.log("Navigate to tour:", tour.id);
+  const handleTourPress = (tour: Package) => {
+    console.log("🔗 Navigating to package detail:", tour.id);
+    router.push({
+      pathname: "/package-detail",
+      params: { id: tour.id },
+    });
   };
 
-  const renderTour = ({ item }: { item: TourPackage }) => (
+  const handleRefresh = () => {
+    fetchPackages();
+  };
+
+  const renderTour = ({ item }: { item: Package }) => (
     <TourCard tour={item} onPress={handleTourPress} />
   );
+
+  if (error && packages.length === 0) {
+    return (
+      <SafeAreaView style={styles.container} edges={["top"]}>
+        <View style={styles.header}>
+          {showBackButton && (
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <Ionicons name="arrow-back" size={24} color="#333" />
+            </TouchableOpacity>
+          )}
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.headerTitle}>Paket Wisata</Text>
+            <Text style={styles.headerSubtitle}>
+              Temukan petualangan sempurna Anda
+            </Text>
+          </View>
+        </View>
+        <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle-outline" size={64} color="#ccc" />
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
+            <Text style={styles.retryButtonText}>Coba Lagi</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Tour Packages</Text>
-        <Text style={styles.headerSubtitle}>Find your perfect adventure</Text>
+        {showBackButton && (
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="arrow-back" size={24} color="#333" />
+          </TouchableOpacity>
+        )}
+        <View style={styles.headerTextContainer}>
+          <Text style={styles.headerTitle}>Paket Wisata</Text>
+          <Text style={styles.headerSubtitle}>
+            Temukan petualangan sempurna Anda
+          </Text>
+        </View>
+      </View>
+      <View style={styles.searchAndFilterContainer}>
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
+          <Ionicons
+            name="search"
+            size={20}
+            color="#999"
+            style={styles.searchIcon}
+          />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Cari paket tour berdasarkan nama, destinasi, atau kategori"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholderTextColor="#999"
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery("")}>
+              <Ionicons name="close-circle" size={20} color="#999" />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Filter Chips */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.filterScroll}
+          contentContainerStyle={styles.filterContainer}
+        >
+          {/* Destination Filters */}
+          {destinations.map((destination) => (
+            <TouchableOpacity
+              key={destination.id}
+              style={[
+                styles.filterChip,
+                selectedDestinationId === destination.id &&
+                  styles.filterChipActive,
+              ]}
+              onPress={() =>
+                setSelectedDestinationId(
+                  selectedDestinationId === destination.id
+                    ? undefined
+                    : destination.id,
+                )
+              }
+            >
+              <Text
+                style={[
+                  styles.filterChipText,
+                  selectedDestinationId === destination.id &&
+                    styles.filterChipTextActive,
+                ]}
+              >
+                📍 {destination.name}
+              </Text>
+            </TouchableOpacity>
+          ))}
+
+          {/* Category Filters */}
+          {categories.map((category) => (
+            <TouchableOpacity
+              key={category.id}
+              style={[
+                styles.filterChip,
+                selectedCategoryId === category.id && styles.filterChipActive,
+              ]}
+              onPress={() =>
+                setSelectedCategoryId(
+                  selectedCategoryId === category.id ? undefined : category.id,
+                )
+              }
+            >
+              <Text
+                style={[
+                  styles.filterChipText,
+                  selectedCategoryId === category.id &&
+                    styles.filterChipTextActive,
+                ]}
+              >
+                {category.name}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </View>
 
       <FlatList
-        data={featuredTours}
+        data={packages}
         renderItem={renderTour}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
-        refreshing={isLoadingTours}
-        onRefresh={fetchFeaturedTours}
+        refreshing={isLoading}
+        onRefresh={handleRefresh}
         ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No tours available</Text>
-          </View>
+          isLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#11468F" />
+            </View>
+          ) : (
+            <View style={styles.emptyContainer}>
+              <Ionicons name="map-outline" size={64} color="#ccc" />
+              <Text style={styles.emptyText}>Belum ada paket wisata</Text>
+            </View>
+          )
         }
       />
     </SafeAreaView>
@@ -110,7 +386,25 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
   },
   header: {
-    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingTop: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
+    gap: 12,
+  },
+  backButton: {
+    padding: 4,
+  },
+  headerTextContainer: {
+    flex: 1,
+  },
+  searchAndFilterContainer: {
+    paddingHorizontal: 16,
+    paddingBottom: 12,
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#e0e0e0",
@@ -124,6 +418,53 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     marginTop: 4,
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginBottom: 12,
+    height: 44,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    color: "#333",
+    padding: 0,
+  },
+  filterScroll: {
+    marginHorizontal: -16,
+    paddingHorizontal: 16,
+  },
+  filterContainer: {
+    flexDirection: "row",
+    gap: 8,
+    paddingRight: 16,
+  },
+  filterChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: "#f5f5f5",
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+  },
+  filterChipActive: {
+    backgroundColor: "#11468F",
+    borderColor: "#11468F",
+  },
+  filterChipText: {
+    fontSize: 13,
+    color: "#666",
+    fontWeight: "500",
+  },
+  filterChipTextActive: {
+    color: "#fff",
   },
   listContent: {
     paddingVertical: 16,
@@ -147,30 +488,61 @@ const styles = StyleSheet.create({
   cardContent: {
     padding: 12,
   },
+  typeBadge: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    backgroundColor: "#32cc0f",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  typeBadgeText: {
+    color: "#fff",
+    fontSize: 11,
+    fontWeight: "600",
+  },
   cardTitle: {
     fontSize: 18,
     fontWeight: "600",
     color: "#333",
     marginBottom: 6,
   },
+  destinationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginBottom: 8,
+  },
   destination: {
     fontSize: 14,
     color: "#666",
-    marginBottom: 8,
   },
   detailsRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    gap: 12,
     marginBottom: 12,
+  },
+  detailItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
   },
   duration: {
     fontSize: 13,
     color: "#555",
   },
+  fitnessIcon: {
+    fontSize: 12,
+  },
   difficulty: {
     fontSize: 13,
     color: "#555",
     textTransform: "capitalize",
+  },
+  participantText: {
+    fontSize: 13,
+    color: "#555",
   },
   cardFooter: {
     flexDirection: "row",
@@ -183,12 +555,12 @@ const styles = StyleSheet.create({
   ratingContainer: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 4,
   },
   ratingText: {
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: "600",
     color: "#333",
-    marginRight: 4,
   },
   reviewCount: {
     fontSize: 12,
@@ -202,9 +574,14 @@ const styles = StyleSheet.create({
     color: "#999",
   },
   price: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
-    color: "#2196F3",
+    color: "#11468F",
+  },
+  loadingContainer: {
+    padding: 40,
+    alignItems: "center",
+    justifyContent: "center",
   },
   emptyContainer: {
     padding: 40,
@@ -213,5 +590,29 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     color: "#999",
+    marginTop: 12,
+  },
+  errorContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 40,
+  },
+  errorText: {
+    fontSize: 16,
+    color: "#999",
+    marginTop: 12,
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: "#11468F",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
   },
 });

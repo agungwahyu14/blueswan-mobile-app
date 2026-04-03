@@ -68,7 +68,7 @@ export const RegisterScreen: React.FC = () => {
 
     try {
       await register(fullName, email, password, phoneNumber);
-      router.replace("/");
+      router.replace("/home");
     } catch (err) {
       Alert.alert(
         "Pendaftaran Gagal",
@@ -82,7 +82,7 @@ export const RegisterScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}

@@ -1,22 +1,32 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import React from 'react';
-import { useColorScheme } from 'react-native';
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+} from "@react-navigation/native";
+import { Stack } from "expo-router";
+import React from "react";
+import { useColorScheme } from "react-native";
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
+import { AnimatedSplashOverlay } from "@/components/animated-icon";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <AnimatedSplashOverlay />
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="welcome" />
+        <Stack.Screen name="home" />
         <Stack.Screen name="login" />
         <Stack.Screen name="register" />
+        <Stack.Screen name="edit-profile" />
         <Stack.Screen name="about-us" />
+        <Stack.Screen name="package-detail" />
+        <Stack.Screen name="transport-detail" />
+        <Stack.Screen name="promo" />
+        <Stack.Screen name="gallery" />
+        <Stack.Screen name="tours" />
+        <Stack.Screen name="transportation" />
       </Stack>
     </ThemeProvider>
   );

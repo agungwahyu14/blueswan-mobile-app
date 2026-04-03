@@ -18,31 +18,18 @@ interface ProfileRowProps {
   icon: string;
   label: string;
   value?: string;
-  onPress?: () => void;
-  showChevron?: boolean;
 }
 
-const ProfileRow: React.FC<ProfileRowProps> = ({
-  icon,
-  label,
-  value,
-  onPress,
-  showChevron = true,
-}) => (
-  <TouchableOpacity
-    style={styles.row}
-    onPress={onPress}
-    activeOpacity={onPress ? 0.7 : 1}
-  >
+const ProfileRow: React.FC<ProfileRowProps> = ({ icon, label, value }) => (
+  <View style={styles.row}>
     <View style={styles.rowLeft}>
       <Text style={styles.rowIcon}>{icon}</Text>
       <Text style={styles.rowLabel}>{label}</Text>
     </View>
     <View style={styles.rowRight}>
       {value && <Text style={styles.rowValue}>{value}</Text>}
-      {showChevron && onPress && <Text style={styles.chevron}>›</Text>}
     </View>
-  </TouchableOpacity>
+  </View>
 );
 
 export const ProfileScreen: React.FC = () => {
@@ -51,23 +38,16 @@ export const ProfileScreen: React.FC = () => {
   const colors = Colors[scheme ?? "light"];
 
   const handleEditProfile = () => {
-    console.log("Navigate to edit profile");
+    router.push("/edit-profile" as any);
   };
 
-  const handleSettings = () => {
-    console.log("Navigate to settings");
-  };
-
-  const handlePaymentMethods = () => {
-    console.log("Navigate to payment methods");
-  };
-
-  const handleNotifications = () => {
-    console.log("Navigate to notifications");
-  };
-
-  const handleHelp = () => {
-    console.log("Navigate to help center");
+  const getInitials = (name?: string) => {
+    if (!name) return "U";
+    const parts = name.split(" ");
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
   };
 
   const handleAbout = () => {
@@ -82,7 +62,7 @@ export const ProfileScreen: React.FC = () => {
         style: "destructive",
         onPress: async () => {
           await logout();
-          router.replace("/welcome" as any);
+          router.replace("/login" as any);
         },
       },
     ]);
@@ -102,79 +82,92 @@ export const ProfileScreen: React.FC = () => {
                   { backgroundColor: colors.primary },
                 ]}
               >
-                <Text style={styles.avatarText}>
-                  {user?.firstName?.[0]}
-                  {user?.lastName?.[0]}
-                </Text>
+                <Text style={styles.avatarText}>{getInitials(user?.name)}</Text>
               </View>
             )}
           </View>
           <Text style={[styles.userName, { color: colors.text }]}>
-            {user?.firstName} {user?.lastName}
+            {user?.name || "User"}
           </Text>
           <Text style={styles.userEmail}>{user?.email}</Text>
+          {user?.is_verified && (
+            <View style={styles.verifiedBadge}>
+              <Text style={styles.verifiedText}>✓ Verified</Text>
+            </View>
+          )}
 
           <TouchableOpacity
-            style={[styles.editButton, { borderColor: colors.primary }]}
+            style={[styles.editButton, { borderColor: colors.accent }]}
             onPress={handleEditProfile}
           >
-            <Text style={[styles.editButtonText, { color: colors.primary }]}>
+            <Text style={[styles.editButtonText, { color: colors.accent }]}>
               Edit Profile
             </Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Account</Text>
+          <Text style={styles.sectionTitle}>Personal Information</Text>
           <View style={styles.card}>
             <ProfileRow
               icon="👤"
-              label="Personal Information"
-              value={user?.phoneNumber || "Not set"}
-              onPress={handleEditProfile}
+              label="Name"
+              value={user?.name || "Not set"}
+            />
+            <View style={styles.divider} />
+            <ProfileRow icon="📧" label="Email" value={user?.email} />
+            <View style={styles.divider} />
+            <ProfileRow
+              icon="📱"
+              label="Phone Number"
+              value={user?.phone_number || "Not set"}
             />
             <View style={styles.divider} />
             <ProfileRow
-              icon="💳"
-              label="Payment Methods"
-              onPress={handlePaymentMethods}
+              icon="🌍"
+              label="Nationality"
+              value={user?.nationality || "Not set"}
             />
             <View style={styles.divider} />
             <ProfileRow
-              icon="🔔"
-              label="Notifications"
-              onPress={handleNotifications}
+              icon="🎂"
+              label="Date of Birth"
+              value={
+                user?.date_of_birth
+                  ? new Date(user.date_of_birth).toLocaleDateString()
+                  : "Not set"
+              }
             />
-            <View style={styles.divider} />
-            <ProfileRow icon="⚙️" label="Settings" onPress={handleSettings} />
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Preferences</Text>
+        {/* <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Account</Text>
           <View style={styles.card}>
             <ProfileRow
-              icon="💱"
-              label="Currency"
-              value={user?.preferences.currency || "USD"}
-              onPress={handleSettings}
-            />
-            <View style={styles.divider} />
-            <ProfileRow
-              icon="🌐"
-              label="Language"
-              value={user?.preferences.language || "English"}
-              onPress={handleSettings}
+              icon="👥"
+              label="Role"
+              value={user?.role?.name || "User"}
             />
           </View>
-        </View>
+        </View> */}
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Support</Text>
           <View style={styles.card}>
-            <ProfileRow icon="❓" label="Help Center" onPress={handleHelp} />
-            <View style={styles.divider} />
-            <ProfileRow icon="ℹ️" label="About" onPress={handleAbout} />
+            <TouchableOpacity
+              style={styles.row}
+              onPress={handleAbout}
+              activeOpacity={0.7}
+            >
+              <View style={styles.rowLeft}>
+                <Text style={styles.rowIcon}>ℹ️</Text>
+                <Text style={styles.rowLabel}>About</Text>
+              </View>
+              <View style={styles.rowRight}>
+                <Text style={styles.chevron}>›</Text>
+              </View>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -228,13 +221,26 @@ const styles = StyleSheet.create({
   userEmail: {
     fontSize: 14,
     color: "#666",
-    marginBottom: 16,
+    marginBottom: 8,
+  },
+  verifiedBadge: {
+    backgroundColor: "#4CAF50",
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginTop: 8,
+  },
+  verifiedText: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "600",
   },
   editButton: {
     paddingHorizontal: 24,
     paddingVertical: 10,
     borderRadius: 20,
-    borderWidth: 1,
+    borderWidth: 1.5,
+    marginTop: 16,
   },
   editButtonText: {
     fontSize: 14,

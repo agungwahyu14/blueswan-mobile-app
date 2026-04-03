@@ -1,8 +1,9 @@
 import type {
-    AuthCredentials,
-    AuthResponse,
-    RegisterPayload,
-    User
+  AuthCredentials,
+  AuthResponse,
+  RegisterPayload,
+  UpdateUserPayload,
+  User,
 } from "@/types/user";
 import { apiClient } from "./api-client";
 
@@ -12,7 +13,7 @@ export const authService = {
    */
   login: async (credentials: AuthCredentials): Promise<AuthResponse> => {
     const response = await apiClient.post<AuthResponse>(
-      "/auth/login",
+      "/api/auth/login",
       credentials,
     );
 
@@ -29,7 +30,7 @@ export const authService = {
    */
   register: async (payload: RegisterPayload): Promise<AuthResponse> => {
     const response = await apiClient.post<AuthResponse>(
-      "/auth/register",
+      "/api/auth/register",
       payload,
     );
 
@@ -45,15 +46,27 @@ export const authService = {
    * Logout current user
    */
   logout: async (): Promise<void> => {
-    await apiClient.post<void>("/auth/logout");
-    apiClient.setAuthToken(null);
+    try {
+      await apiClient.post<void>("/api/auth/logout");
+    } finally {
+      // Always clear token even if API call fails
+      apiClient.setAuthToken(null);
+    }
   },
 
   /**
    * Get current user data
    */
   me: async (): Promise<User> => {
-    const response = await apiClient.get<User>("/auth/me");
+    const response = await apiClient.get<User>("/api/auth/me");
+    return response;
+  },
+
+  /**
+   * Update user profile
+   */
+  updateProfile: async (payload: UpdateUserPayload): Promise<User> => {
+    const response = await apiClient.put<User>("/api/auth/profile", payload);
     return response;
   },
 
@@ -61,7 +74,7 @@ export const authService = {
    * Refresh authentication token
    */
   refreshToken: async (refreshToken: string): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>("/auth/refresh", {
+    const response = await apiClient.post<AuthResponse>("/api/auth/refresh", {
       refreshToken,
     });
 
@@ -76,14 +89,14 @@ export const authService = {
    * Request password reset
    */
   requestPasswordReset: async (email: string): Promise<void> => {
-    await apiClient.post<void>("/auth/password-reset/request", { email });
+    await apiClient.post<void>("/api/auth/password-reset/request", { email });
   },
 
   /**
    * Reset password with token
    */
   resetPassword: async (token: string, newPassword: string): Promise<void> => {
-    await apiClient.post<void>("/auth/password-reset/confirm", {
+    await apiClient.post<void>("/api/auth/password-reset/confirm", {
       token,
       newPassword,
     });
@@ -93,6 +106,6 @@ export const authService = {
    * Verify email with token
    */
   verifyEmail: async (token: string): Promise<void> => {
-    await apiClient.post<void>("/auth/verify-email", { token });
+    await apiClient.post<void>("/api/auth/verify-email", { token });
   },
 };

@@ -102,18 +102,33 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       logout: async () => {
-        try {
-          await authService.logout();
-        } catch (error) {
-          console.error("Logout error:", error);
-        } finally {
-          set({
-            user: null,
-            token: null,
-            refreshToken: null,
-            isAuthenticated: false,
-            error: null,
-          });
+        const { token } = get();
+
+        // Always clear local state first
+        set({
+          user: null,
+          token: null,
+          refreshToken: null,
+          isAuthenticated: false,
+          error: null,
+        });
+
+        // Only call API if token exists
+        if (token) {
+          try {
+            // Temporarily set token for logout API call
+            apiClient.setAuthToken(token);
+            await authService.logout();
+          } catch (error) {
+            // Silently handle logout errors - state already cleared
+            console.log(
+              "Logout API call failed, but local state cleared:",
+              error,
+            );
+          }
+        } else {
+          // No token, just clear from apiClient
+          apiClient.setAuthToken(null);
         }
       },
 
@@ -152,7 +167,10 @@ export const useAuthStore = create<AuthStore>()(
           });
         } catch (error) {
           set({
-            error: error instanceof Error ? error.message : "Failed to get user data",
+            error:
+              error instanceof Error
+                ? error.message
+                : "Failed to get user data",
             isLoading: false,
           });
           throw error;

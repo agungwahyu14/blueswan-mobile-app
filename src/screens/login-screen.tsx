@@ -50,6 +50,10 @@ export const LoginScreen: React.FC = () => {
     router.push("/register" as any);
   };
 
+  const handleForgotPassword = () => {
+    router.push("/forgot-password" as any);
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <KeyboardAvoidingView
@@ -124,7 +128,11 @@ export const LoginScreen: React.FC = () => {
                 </TouchableOpacity>
               </View>
 
-              <TouchableOpacity style={styles.forgotPassword}>
+              <TouchableOpacity
+                style={styles.forgotPassword}
+                onPress={handleForgotPassword}
+                disabled={isLoading}
+              >
                 <Text
                   style={[styles.forgotPasswordText, { color: colors.accent }]}
                 >

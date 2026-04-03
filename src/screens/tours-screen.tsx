@@ -41,7 +41,11 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onPress }) => {
       activeOpacity={0.8}
     >
       <Image
-        source={{ uri: primaryPhoto?.photo_url }}
+        source={{
+          uri:
+            primaryPhoto?.photo_url ||
+            "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=400&q=80",
+        }}
         style={styles.cardImage}
         resizeMode="cover"
       />

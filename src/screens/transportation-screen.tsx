@@ -9,6 +9,7 @@ import {
     ScrollView,
     StyleSheet,
     Text,
+    TextInput,
     TouchableOpacity,
     View,
 } from "react-native";
@@ -128,27 +129,42 @@ export const TransportationScreen: React.FC<TransportationScreenProps> = ({
   const [transports, setTransports] = useState<TransportationItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedTransportType, setSelectedTransportType] = useState<
     string | undefined
   >();
 
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   useEffect(() => {
     fetchTransports();
-  }, [selectedTransportType]);
+  }, [selectedTransportType, debouncedSearch]);
 
   const fetchTransports = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const params: { transport_type?: string } = {};
+      const params: { transport_type?: string; search?: string } = {};
       if (selectedTransportType) {
         params.transport_type = selectedTransportType;
+      }
+      if (debouncedSearch && debouncedSearch.trim()) {
+        params.search = debouncedSearch.trim();
       }
 
       console.log("\n🚗 Fetching transports...");
       console.log("Filters:", {
         transport_type: params.transport_type || "none",
+        search: params.search || "none",
       });
 
       const response = await transportService.getTransports(params);
@@ -172,7 +188,8 @@ export const TransportationScreen: React.FC<TransportationScreenProps> = ({
               transport.vehicle_types.description ||
               "",
             image:
-              primaryPhoto?.image_url || "https://via.placeholder.com/400x250",
+              primaryPhoto?.image_url ||
+              "https://images.unsplash.com/photo-1527786356703-4b100091cd2c?w=400&q=80",
             priceRange: `Rp ${priceIdr.toLocaleString("id-ID")} / ${transport.max_distance_km} km`,
             capacity: `${transport.capacity} passengers`,
             features: transport.transport_features.map(
@@ -193,7 +210,7 @@ export const TransportationScreen: React.FC<TransportationScreenProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [selectedTransportType]);
+  }, [selectedTransportType, debouncedSearch]);
 
   const handleTransportationPress = (item: TransportationItem) => {
     console.log("🔗 Navigating to transport detail:", item.id);
@@ -228,6 +245,28 @@ export const TransportationScreen: React.FC<TransportationScreenProps> = ({
             <Text style={styles.headerSubtitle}>
               Pilih transportasi terbaik untuk perjalanan Anda
             </Text>
+          </View>
+
+          {/* Search Bar */}
+          <View style={styles.searchContainer}>
+            <Ionicons
+              name="search"
+              size={20}
+              color="#999"
+              style={styles.searchIcon}
+            />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Cari transportasi berdasarkan nama atau tipe"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholderTextColor="#999"
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery("")}>
+                <Ionicons name="close-circle" size={20} color="#999" />
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* Filter Chips */}
@@ -290,6 +329,28 @@ export const TransportationScreen: React.FC<TransportationScreenProps> = ({
           <Text style={styles.headerSubtitle}>
             Pilih transportasi terbaik untuk perjalanan Anda
           </Text>
+        </View>
+
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
+          <Ionicons
+            name="search"
+            size={20}
+            color="#999"
+            style={styles.searchIcon}
+          />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Cari transportasi berdasarkan nama atau tipe"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholderTextColor="#999"
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery("")}>
+              <Ionicons name="close-circle" size={20} color="#999" />
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Filter Chips */}
@@ -380,6 +441,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     marginTop: 4,
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginTop: 12,
+    height: 44,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    color: "#333",
+    padding: 0,
   },
   filterScroll: {
     marginTop: 12,

@@ -120,10 +120,42 @@ export default function PackageDetailScreen() {
         {/* Hero Image */}
         {primaryPhoto && (
           <Image
-            source={{ uri: primaryPhoto.photo_url }}
+            source={{
+              uri:
+                primaryPhoto.photo_url ||
+                "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+            }}
             style={styles.heroImage}
             resizeMode="cover"
           />
+        )}
+
+        {/* Photo Gallery */}
+        {packageData.photos.length > 1 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Foto Paket</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.photoGallery}
+            >
+              {packageData.photos.map((photo, index) => (
+                <Image
+                  key={photo.id}
+                  source={{
+                    uri:
+                      photo.photo_url ||
+                      `https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=400&q=80`,
+                  }}
+                  style={[
+                    styles.galleryPhoto,
+                    index === 0 && styles.firstPhoto,
+                  ]}
+                  resizeMode="cover"
+                />
+              ))}
+            </ScrollView>
+          </View>
         )}
 
         {/* Type Badge */}
@@ -326,6 +358,19 @@ const styles = StyleSheet.create({
   heroImage: {
     width: "100%",
     height: 300,
+  },
+  photoGallery: {
+    marginTop: 12,
+  },
+  galleryPhoto: {
+    width: 200,
+    height: 150,
+    borderRadius: 8,
+    marginLeft: 12,
+    backgroundColor: "#f0f0f0",
+  },
+  firstPhoto: {
+    marginLeft: 0,
   },
   typeBadge: {
     position: "absolute",

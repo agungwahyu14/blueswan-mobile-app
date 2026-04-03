@@ -55,7 +55,11 @@ export const GalleryScreen: React.FC = () => {
   const renderGalleryItem = ({ item }: { item: Gallery }) => (
     <TouchableOpacity style={styles.galleryItem} activeOpacity={0.8}>
       <Image
-        source={{ uri: item.image_url }}
+        source={{
+          uri:
+            item.image_url ||
+            "https://images.unsplash.com/photo-1503220317375-aaad61436b1b?w=400&q=80",
+        }}
         style={styles.galleryImage}
         resizeMode="cover"
       />

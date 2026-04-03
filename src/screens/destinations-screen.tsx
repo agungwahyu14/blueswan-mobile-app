@@ -85,7 +85,11 @@ export const DestinationsScreen: React.FC = () => {
         }
       >
         <Image
-          source={{ uri: primaryPhoto?.photo_url }}
+          source={{
+            uri:
+              primaryPhoto?.photo_url ||
+              "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=240&q=80",
+          }}
           style={styles.packageImage}
           resizeMode="cover"
         />
@@ -151,7 +155,11 @@ export const DestinationsScreen: React.FC = () => {
         {/* Hero Section */}
         <View style={styles.heroContainer}>
           <Image
-            source={{ uri: heroData.background_image_url }}
+            source={{
+              uri:
+                heroData.background_image_url ||
+                "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800&q=80",
+            }}
             style={styles.heroImage}
             resizeMode="cover"
           />
@@ -198,9 +206,13 @@ export const DestinationsScreen: React.FC = () => {
           >
             {/* Dummy Promo Card 1 */}
             <View style={styles.promoCard}>
-              <View style={styles.promoImagePlaceholder}>
-                <Ionicons name="pricetag" size={40} color="#ccc" />
-              </View>
+              <Image
+                source={{
+                  uri: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=300&q=80",
+                }}
+                style={styles.promoImage}
+                resizeMode="cover"
+              />
               <View style={styles.discountBadge}>
                 <Text style={styles.discountText}>30% OFF</Text>
               </View>
@@ -217,9 +229,13 @@ export const DestinationsScreen: React.FC = () => {
 
             {/* Dummy Promo Card 2 */}
             <View style={styles.promoCard}>
-              <View style={styles.promoImagePlaceholder}>
-                <Ionicons name="gift" size={40} color="#ccc" />
-              </View>
+              <Image
+                source={{
+                  uri: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&q=80",
+                }}
+                style={styles.promoImage}
+                resizeMode="cover"
+              />
               <View style={styles.discountBadge}>
                 <Text style={styles.discountText}>20% OFF</Text>
               </View>
@@ -236,9 +252,13 @@ export const DestinationsScreen: React.FC = () => {
 
             {/* Dummy Promo Card 3 */}
             <View style={styles.promoCard}>
-              <View style={styles.promoImagePlaceholder}>
-                <Ionicons name="calendar" size={40} color="#ccc" />
-              </View>
+              <Image
+                source={{
+                  uri: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=300&q=80",
+                }}
+                style={styles.promoImage}
+                resizeMode="cover"
+              />
               <View style={styles.discountBadge}>
                 <Text style={styles.discountText}>25% OFF</Text>
               </View>
@@ -302,7 +322,11 @@ export const DestinationsScreen: React.FC = () => {
                     }
                   >
                     <Image
-                      source={{ uri: primaryPhoto?.image_url }}
+                      source={{
+                        uri:
+                          primaryPhoto?.image_url ||
+                          "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=240&q=80",
+                      }}
                       style={styles.transportImage}
                       resizeMode="cover"
                     />
@@ -376,7 +400,11 @@ export const DestinationsScreen: React.FC = () => {
                     activeOpacity={0.8}
                   >
                     <Image
-                      source={{ uri: gallery.image_url }}
+                      source={{
+                        uri:
+                          gallery.image_url ||
+                          "https://images.unsplash.com/photo-1530789253388-582c481c54b0?w=400&q=80",
+                      }}
                       style={styles.galleryImage}
                       resizeMode="cover"
                     />

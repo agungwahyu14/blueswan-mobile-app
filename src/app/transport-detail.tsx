@@ -114,12 +114,42 @@ export default function TransportDetailScreen() {
 
       <ScrollView style={styles.content}>
         {/* Hero Image */}
-        {primaryPhoto && (
-          <Image
-            source={{ uri: primaryPhoto.image_url }}
-            style={styles.heroImage}
-            resizeMode="cover"
-          />
+        <Image
+          source={{
+            uri:
+              primaryPhoto?.image_url ||
+              "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&q=80",
+          }}
+          style={styles.heroImage}
+          resizeMode="cover"
+        />
+
+        {/* Photo Gallery */}
+        {transportData.transport_photos.length > 1 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Foto Kendaraan</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.photoGallery}
+            >
+              {transportData.transport_photos.map((photo, index) => (
+                <Image
+                  key={photo.id}
+                  source={{
+                    uri:
+                      photo.image_url ||
+                      `https://images.unsplash.com/photo-1527786356703-4b100091cd2c?w=400&q=80`,
+                  }}
+                  style={[
+                    styles.galleryPhoto,
+                    index === 0 && styles.firstPhoto,
+                  ]}
+                  resizeMode="cover"
+                />
+              ))}
+            </ScrollView>
+          </View>
         )}
 
         {/* Main Info */}
@@ -378,6 +408,19 @@ const styles = StyleSheet.create({
   heroImage: {
     width: "100%",
     height: 300,
+  },
+  photoGallery: {
+    marginTop: 12,
+  },
+  galleryPhoto: {
+    width: 200,
+    height: 150,
+    borderRadius: 8,
+    marginLeft: 12,
+    backgroundColor: "#f0f0f0",
+  },
+  firstPhoto: {
+    marginLeft: 0,
   },
   mainInfo: {
     padding: 16,

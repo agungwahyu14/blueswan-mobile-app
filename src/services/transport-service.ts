@@ -7,6 +7,7 @@ import { apiClient } from "./api-client";
 interface GetTransportsParams {
   transport_type?: string;
   vehicle_type_id?: string;
+  search?: string;
 }
 
 export const transportService = {
@@ -23,6 +24,9 @@ export const transportService = {
     }
     if (params?.vehicle_type_id && params.vehicle_type_id.trim() !== "") {
       cleanParams.vehicle_type_id = params.vehicle_type_id.trim();
+    }
+    if (params?.search && params.search.trim() !== "") {
+      cleanParams.search = params.search.trim();
     }
 
     return apiClient.getFullResponse<TransportsResponse>("/api/transports", {

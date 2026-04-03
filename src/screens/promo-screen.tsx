@@ -47,7 +47,11 @@ export const PromoScreen: React.FC = () => {
   const renderPromoCard = ({ item }: { item: Promo }) => (
     <TouchableOpacity style={styles.card} activeOpacity={0.8}>
       <Image
-        source={{ uri: item.image_url }}
+        source={{
+          uri:
+            item.image_url ||
+            "https://images.unsplash.com/photo-1607083206968-13611e3d76db?w=400&q=80",
+        }}
         style={styles.cardImage}
         resizeMode="cover"
       />

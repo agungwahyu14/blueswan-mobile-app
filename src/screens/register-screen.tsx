@@ -15,13 +15,11 @@ import {
     TextInput,
     TouchableOpacity,
     View,
-    useColorScheme,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export const RegisterScreen: React.FC = () => {
-  const scheme = useColorScheme();
-  const colors = Colors[scheme ?? "light"];
+  const colors = Colors;
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");

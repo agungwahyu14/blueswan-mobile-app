@@ -13,13 +13,11 @@ import {
     TextInput,
     TouchableOpacity,
     View,
-    useColorScheme
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export const ForgotPasswordScreen: React.FC = () => {
-  const scheme = useColorScheme();
-  const colors = Colors[scheme ?? "light"];
+  const colors = Colors;
 
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);

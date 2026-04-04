@@ -1,19 +1,194 @@
+import { Colors } from "@/constants/theme";
 import { useBookingStore } from "@/store/booking-store";
 import type { Booking } from "@/types/booking";
+import { router } from "expo-router";
 import React, { useEffect } from "react";
 import {
-    FlatList,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+// Dummy booking data
+const DUMMY_BOOKINGS: Booking[] = [
+  {
+    id: "BK001",
+    userId: "user123",
+    tourPackageId: "pkg001",
+    tourPackage: {
+      id: "pkg001",
+      title: "Bali Paradise Adventure",
+      destinationName: "Bali, Indonesia",
+      imageUrl:
+        "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400&q=80",
+    },
+    startDate: "2026-05-15",
+    endDate: "2026-05-20",
+    numberOfTravelers: 2,
+    totalPrice: 15000000,
+    currency: "IDR",
+    status: "confirmed",
+    createdAt: "2026-04-01",
+    updatedAt: "2026-04-01",
+    paymentStatus: "paid",
+  },
+  {
+    id: "BK002",
+    userId: "user123",
+    tourPackageId: "pkg002",
+    tourPackage: {
+      id: "pkg002",
+      title: "Raja Ampat Diving Expedition",
+      destinationName: "Raja Ampat, Papua",
+      imageUrl:
+        "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&q=80",
+    },
+    startDate: "2026-06-10",
+    endDate: "2026-06-17",
+    numberOfTravelers: 4,
+    totalPrice: 32000000,
+    currency: "IDR",
+    status: "pending",
+    createdAt: "2026-04-03",
+    updatedAt: "2026-04-03",
+    paymentStatus: "pending",
+  },
+  {
+    id: "BK003",
+    userId: "user123",
+    tourPackageId: "pkg003",
+    tourPackage: {
+      id: "pkg003",
+      title: "Komodo Island Explorer",
+      destinationName: "Komodo, NTT",
+      imageUrl:
+        "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=80",
+    },
+    startDate: "2026-03-20",
+    endDate: "2026-03-24",
+    numberOfTravelers: 3,
+    totalPrice: 18500000,
+    currency: "IDR",
+    status: "completed",
+    createdAt: "2026-02-15",
+    updatedAt: "2026-02-15",
+    paymentStatus: "paid",
+  },
+  {
+    id: "BK004",
+    userId: "user123",
+    tourPackageId: "pkg004",
+    tourPackage: {
+      id: "pkg004",
+      title: "Yogyakarta Cultural Tour",
+      destinationName: "Yogyakarta, Java",
+      imageUrl:
+        "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=400&q=80",
+    },
+    startDate: "2026-04-20",
+    endDate: "2026-04-23",
+    numberOfTravelers: 2,
+    totalPrice: 8500000,
+    currency: "IDR",
+    status: "confirmed",
+    createdAt: "2026-03-25",
+    updatedAt: "2026-03-25",
+    paymentStatus: "paid",
+  },
+  {
+    id: "BK005",
+    userId: "user123",
+    tourPackageId: "pkg005",
+    tourPackage: {
+      id: "pkg005",
+      title: "Lombok Beach Getaway",
+      destinationName: "Lombok, NTB",
+      imageUrl:
+        "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&q=80",
+    },
+    startDate: "2026-07-05",
+    endDate: "2026-07-10",
+    numberOfTravelers: 3,
+    totalPrice: 12000000,
+    currency: "IDR",
+    status: "confirmed",
+    createdAt: "2026-03-28",
+    updatedAt: "2026-03-28",
+    paymentStatus: "paid",
+  },
+  {
+    id: "BK006",
+    userId: "user123",
+    tourPackageId: "pkg006",
+    tourPackage: {
+      id: "pkg006",
+      title: "Bromo Sunrise Trek",
+      destinationName: "Mount Bromo, East Java",
+      imageUrl:
+        "https://images.unsplash.com/photo-1605640840605-14ac1855827b?w=400&q=80",
+    },
+    startDate: "2026-08-12",
+    endDate: "2026-08-15",
+    numberOfTravelers: 4,
+    totalPrice: 9500000,
+    currency: "IDR",
+    status: "confirmed",
+    createdAt: "2026-04-02",
+    updatedAt: "2026-04-02",
+    paymentStatus: "paid",
+  },
+  {
+    id: "BK007",
+    userId: "user123",
+    tourPackageId: "pkg007",
+    tourPackage: {
+      id: "pkg007",
+      title: "Sumatra Wildlife Safari",
+      destinationName: "Sumatra, Indonesia",
+      imageUrl:
+        "https://images.unsplash.com/photo-1549366021-9f761d450615?w=400&q=80",
+    },
+    startDate: "2026-09-18",
+    endDate: "2026-09-25",
+    numberOfTravelers: 2,
+    totalPrice: 22000000,
+    currency: "IDR",
+    status: "confirmed",
+    createdAt: "2026-03-30",
+    updatedAt: "2026-03-30",
+    paymentStatus: "paid",
+  },
+  {
+    id: "BK008",
+    userId: "user123",
+    tourPackageId: "pkg008",
+    tourPackage: {
+      id: "pkg008",
+      title: "Wakatobi Diving Paradise",
+      destinationName: "Wakatobi, Southeast Sulawesi",
+      imageUrl:
+        "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=400&q=80",
+    },
+    startDate: "2026-10-05",
+    endDate: "2026-10-12",
+    numberOfTravelers: 3,
+    totalPrice: 28000000,
+    currency: "IDR",
+    status: "confirmed",
+    createdAt: "2026-04-01",
+    updatedAt: "2026-04-01",
+    paymentStatus: "paid",
+  },
+];
 
 interface BookingCardProps {
   booking: Booking;
   onPress: (booking: Booking) => void;
+  isHorizontal?: boolean;
 }
 
 const getStatusColor = (status: string): string => {
@@ -46,7 +221,11 @@ const getStatusEmoji = (status: string): string => {
   }
 };
 
-const BookingCard: React.FC<BookingCardProps> = ({ booking, onPress }) => {
+const BookingCard: React.FC<BookingCardProps> = ({
+  booking,
+  onPress,
+  isHorizontal,
+}) => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -58,7 +237,7 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onPress }) => {
 
   return (
     <TouchableOpacity
-      style={styles.card}
+      style={[styles.card, isHorizontal && styles.horizontalCard]}
       onPress={() => onPress(booking)}
       activeOpacity={0.8}
     >
@@ -118,30 +297,42 @@ export const BookingsScreen: React.FC = () => {
     fetchUpcomingBookings,
   } = useBookingStore();
 
+  // Use dummy data for now
+  const displayBookings = DUMMY_BOOKINGS;
+  const displayUpcoming = DUMMY_BOOKINGS.filter(
+    (b) => b.status === "confirmed" && new Date(b.startDate) > new Date(),
+  );
+
   useEffect(() => {
-    fetchMyBookings();
-    fetchUpcomingBookings();
-  }, [fetchMyBookings, fetchUpcomingBookings]);
+    // fetchMyBookings();
+    // fetchUpcomingBookings();
+  }, []);
 
   const handleBookingPress = (booking: Booking) => {
-    // Navigate to booking details
-    console.log("Navigate to booking:", booking.id);
+    router.push({
+      pathname: "/booking-detail" as any,
+      params: { id: booking.id },
+    });
   };
 
   const renderBooking = ({ item }: { item: Booking }) => (
     <BookingCard booking={item} onPress={handleBookingPress} />
   );
 
+  const renderHorizontalBooking = ({ item }: { item: Booking }) => (
+    <BookingCard booking={item} onPress={handleBookingPress} isHorizontal />
+  );
+
   const renderHeader = () => {
-    if (upcomingBookings.length === 0) return null;
+    if (displayUpcoming.length === 0) return null;
 
     return (
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Upcoming Trips</Text>
         <FlatList
           horizontal
-          data={upcomingBookings}
-          renderItem={renderBooking}
+          data={displayUpcoming}
+          renderItem={renderHorizontalBooking}
           keyExtractor={(item) => `upcoming-${item.id}`}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.horizontalList}
@@ -158,26 +349,24 @@ export const BookingsScreen: React.FC = () => {
       </View>
 
       <FlatList
-        data={bookings}
+        data={displayBookings}
         renderItem={renderBooking}
         keyExtractor={(item) => item.id}
         ListHeaderComponent={renderHeader}
         contentContainerStyle={styles.listContent}
-        refreshing={isLoading}
+        refreshing={false}
         onRefresh={() => {
-          fetchMyBookings();
-          fetchUpcomingBookings();
+          // fetchMyBookings();
+          // fetchUpcomingBookings();
         }}
         ListEmptyComponent={
-          !isLoading ? (
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyEmoji}>✈️</Text>
-              <Text style={styles.emptyTitle}>No bookings yet</Text>
-              <Text style={styles.emptyText}>
-                Start exploring and book your first adventure!
-              </Text>
-            </View>
-          ) : null
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyEmoji}>✈️</Text>
+            <Text style={styles.emptyTitle}>No bookings yet</Text>
+            <Text style={styles.emptyText}>
+              Start exploring and book your first adventure!
+            </Text>
+          </View>
         }
       />
     </SafeAreaView>
@@ -187,18 +376,18 @@ export const BookingsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#F0F3FD",
   },
   header: {
     padding: 16,
-    backgroundColor: "#fff",
+    backgroundColor: "#F0F3FD",
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+    borderBottomColor: "#E0E0E0",
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#333",
+    color: Colors.primary,
   },
   section: {
     marginBottom: 8,
@@ -206,7 +395,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#333",
+    color: Colors.primary,
     marginHorizontal: 16,
     marginTop: 16,
     marginBottom: 12,
@@ -230,6 +419,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
+  horizontalCard: {
+    width: 320,
+    marginHorizontal: 0,
+    marginRight: 16,
+  },
   cardImage: {
     width: "100%",
     height: 160,
@@ -252,7 +446,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#333",
+    color: Colors.primary,
     marginBottom: 4,
   },
   destination: {
@@ -295,7 +489,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#333",
+    color: Colors.primary,
     marginBottom: 8,
   },
   emptyText: {

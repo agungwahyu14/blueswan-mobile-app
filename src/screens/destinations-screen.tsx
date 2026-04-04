@@ -1,3 +1,4 @@
+import { Colors } from "@/constants/theme";
 import { homeService } from "@/services/home-service";
 import { packageService } from "@/services/package-service";
 import { transportService } from "@/services/transport-service";
@@ -22,8 +23,17 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
 
+const HERO_IMAGES = [
+  "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800&q=80",
+  "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&q=80",
+  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+  "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&q=80",
+  "https://images.unsplash.com/photo-1530789253388-582c481c54b0?w=800&q=80",
+];
+
 export const DestinationsScreen: React.FC = () => {
   const router = useRouter();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [heroData, setHeroData] = useState<HeroSection | null>(null);
   const [packages, setPackages] = useState<Package[]>([]);
   const [transports, setTransports] = useState<Transport[]>([]);
@@ -34,6 +44,14 @@ export const DestinationsScreen: React.FC = () => {
 
   useEffect(() => {
     fetchHomeData();
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % HERO_IMAGES.length);
+    }, 5000); // Change image every 5 seconds
+
+    return () => clearInterval(interval);
   }, []);
 
   const fetchHomeData = async () => {
@@ -59,6 +77,10 @@ export const DestinationsScreen: React.FC = () => {
       setGalleries(galleriesRes.data || []);
 
       console.log("✅ Home data loaded");
+      console.log(
+        "   - Hero image URL:",
+        heroRes.data?.background_image_url || "No URL",
+      );
       console.log("   - Packages:", packagesRes.data.length);
       console.log("   - Transports:", (transportsRes.data || []).length);
       console.log("   - Promos:", (promosRes.data || []).length);
@@ -93,21 +115,21 @@ export const DestinationsScreen: React.FC = () => {
           style={styles.packageImage}
           resizeMode="cover"
         />
-        <View style={styles.packageContent}>
-          <Text style={styles.packageTitle} numberOfLines={2}>
-            {item.name_en || item.name}
-          </Text>
-          <View style={styles.packageLocation}>
-            <Ionicons name="location-outline" size={14} color="#666" />
-            <Text style={styles.packageLocationText} numberOfLines={1}>
-              {item.destination.name_en || item.destination.name}
+        <View style={styles.packageOverlay}>
+          <View style={styles.packageRatingBadge}>
+            <Ionicons name="star" size={12} color="#FFB800" />
+            <Text style={styles.packageRatingBadgeText}>
+              {item.average_rating.toFixed(1)}
             </Text>
           </View>
-          <View style={styles.packageFooter}>
-            <View style={styles.packageRating}>
-              <Ionicons name="star" size={14} color="#FFB800" />
-              <Text style={styles.packageRatingText}>
-                {item.average_rating.toFixed(1)}
+          <View style={styles.packageTextContainer}>
+            <Text style={styles.packageTitle} numberOfLines={2}>
+              {item.name_en || item.name}
+            </Text>
+            <View style={styles.packageLocation}>
+              <Ionicons name="location-outline" size={12} color="#fff" />
+              <Text style={styles.packageLocationText} numberOfLines={1}>
+                {item.destination.name_en || item.destination.name}
               </Text>
             </View>
             <Text style={styles.packagePrice}>
@@ -156,12 +178,20 @@ export const DestinationsScreen: React.FC = () => {
         <View style={styles.heroContainer}>
           <Image
             source={{
-              uri:
-                heroData.background_image_url ||
-                "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800&q=80",
+              uri: HERO_IMAGES[currentImageIndex],
             }}
             style={styles.heroImage}
             resizeMode="cover"
+            // onLoadStart={() => {
+            //   console.log("🖼️ Hero image loading...");
+            // }}
+            // onLoad={() => {
+            //   console.log("✅ Hero image loaded successfully");
+            // }}
+            // onError={(error) => {
+            //   console.error("❌ Hero image failed to load:");
+            //   console.error("   Error:", error.nativeEvent.error);
+            // }}
           />
           <View style={styles.heroOverlay} />
           <View style={styles.heroContent}>
@@ -180,23 +210,88 @@ export const DestinationsScreen: React.FC = () => {
               <Text style={styles.heroButtonText}>View Packages</Text>
             </TouchableOpacity>
           </View>
+
+          {/* Image Indicators */}
+          <View style={styles.imageIndicators}>
+            {HERO_IMAGES.map((_, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.indicator,
+                  currentImageIndex === index && styles.activeIndicator,
+                ]}
+              />
+            ))}
+          </View>
         </View>
 
         {/* Additional Content Placeholder */}
-        <View style={styles.contentSection}>
+        {/* <View style={styles.contentSection}>
           <Text style={styles.contentTitle}>Jelajahi Lebih Lanjut</Text>
           <Text style={styles.contentDescription}>
             Temukan berbagai paket wisata menarik, destinasi eksotis, dan
             layanan transportasi terbaik untuk perjalanan Anda.
           </Text>
+        </View> */}
+
+        {/* Travel Categories Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Kategori Travel</Text>
+          </View>
+          <View style={styles.categoryGrid}>
+            <TouchableOpacity
+              style={styles.categoryCard}
+              onPress={() => router.push("/tours")}
+            >
+              <View style={styles.categoryIconContainer}>
+                <Ionicons name="earth" size={32} color="#11468F" />
+              </View>
+              <Text style={styles.categoryName}>Paket</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.categoryCard}
+              onPress={() => router.push("/transportation")}
+            >
+              <View style={styles.categoryIconContainer}>
+                <Ionicons name="car" size={32} color="#11468F" />
+              </View>
+              <Text style={styles.categoryName}>Transportasi</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.categoryCard}
+              onPress={() => router.push("/promo")}
+            >
+              <View style={styles.categoryIconContainer}>
+                <Ionicons name="pricetag" size={32} color="#11468F" />
+              </View>
+              <Text style={styles.categoryName}>Promosi</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.categoryCard}
+              onPress={() => router.push("/gallery")}
+            >
+              <View style={styles.categoryIconContainer}>
+                <Ionicons name="images" size={32} color="#11468F" />
+              </View>
+              <Text style={styles.categoryName}>Galeri</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Promos Section - Dummy Layout */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Promo Spesial</Text>
-            <TouchableOpacity onPress={() => router.push("/promo")}>
+            <TouchableOpacity
+              onPress={() => router.push("/promo")}
+              style={styles.seeAllButton}
+            >
               <Text style={styles.seeAllText}>Lihat Semua</Text>
+              <Ionicons name="arrow-forward" size={16} color={Colors.accent} />
             </TouchableOpacity>
           </View>
           <ScrollView
@@ -205,7 +300,7 @@ export const DestinationsScreen: React.FC = () => {
             contentContainerStyle={styles.sliderContainer}
           >
             {/* Dummy Promo Card 1 */}
-            <View style={styles.promoCard}>
+            <TouchableOpacity style={styles.promoCard} activeOpacity={0.8}>
               <Image
                 source={{
                   uri: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=300&q=80",
@@ -213,22 +308,21 @@ export const DestinationsScreen: React.FC = () => {
                 style={styles.promoImage}
                 resizeMode="cover"
               />
-              <View style={styles.discountBadge}>
-                <Text style={styles.discountText}>30% OFF</Text>
+              <View style={styles.promoOverlay}>
+                <View style={styles.discountBadge}>
+                  <Text style={styles.discountText}>30% OFF</Text>
+                </View>
+                <View style={styles.promoTextContainer}>
+                  <Text style={styles.promoTitle}>Special Holiday Package</Text>
+                  <Text style={styles.promoSubtitle}>
+                    Hemat hingga 30% untuk paket liburan pilihan
+                  </Text>
+                </View>
               </View>
-              <View style={styles.promoContent}>
-                <Text style={styles.promoTitle}>Special Holiday Package</Text>
-                <Text style={styles.promoDescription}>
-                  Dapatkan diskon hingga 30% untuk paket liburan pilihan
-                </Text>
-                <Text style={styles.promoValidity}>
-                  Valid until Dec 31, 2026
-                </Text>
-              </View>
-            </View>
+            </TouchableOpacity>
 
             {/* Dummy Promo Card 2 */}
-            <View style={styles.promoCard}>
+            <TouchableOpacity style={styles.promoCard} activeOpacity={0.8}>
               <Image
                 source={{
                   uri: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&q=80",
@@ -236,22 +330,21 @@ export const DestinationsScreen: React.FC = () => {
                 style={styles.promoImage}
                 resizeMode="cover"
               />
-              <View style={styles.discountBadge}>
-                <Text style={styles.discountText}>20% OFF</Text>
+              <View style={styles.promoOverlay}>
+                <View style={styles.discountBadge}>
+                  <Text style={styles.discountText}>20% OFF</Text>
+                </View>
+                <View style={styles.promoTextContainer}>
+                  <Text style={styles.promoTitle}>Early Bird Discount</Text>
+                  <Text style={styles.promoSubtitle}>
+                    Pesan sekarang dan hemat 20%
+                  </Text>
+                </View>
               </View>
-              <View style={styles.promoContent}>
-                <Text style={styles.promoTitle}>Early Bird Discount</Text>
-                <Text style={styles.promoDescription}>
-                  Pesan sekarang dan hemat hingga 20% untuk perjalanan Anda
-                </Text>
-                <Text style={styles.promoValidity}>
-                  Valid until Nov 30, 2026
-                </Text>
-              </View>
-            </View>
+            </TouchableOpacity>
 
             {/* Dummy Promo Card 3 */}
-            <View style={styles.promoCard}>
+            <TouchableOpacity style={styles.promoCard} activeOpacity={0.8}>
               <Image
                 source={{
                   uri: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=300&q=80",
@@ -259,19 +352,18 @@ export const DestinationsScreen: React.FC = () => {
                 style={styles.promoImage}
                 resizeMode="cover"
               />
-              <View style={styles.discountBadge}>
-                <Text style={styles.discountText}>25% OFF</Text>
+              <View style={styles.promoOverlay}>
+                <View style={styles.discountBadge}>
+                  <Text style={styles.discountText}>25% OFF</Text>
+                </View>
+                <View style={styles.promoTextContainer}>
+                  <Text style={styles.promoTitle}>Weekend Getaway</Text>
+                  <Text style={styles.promoSubtitle}>
+                    Promo spesial akhir pekan 25% off
+                  </Text>
+                </View>
               </View>
-              <View style={styles.promoContent}>
-                <Text style={styles.promoTitle}>Weekend Getaway</Text>
-                <Text style={styles.promoDescription}>
-                  Promo spesial weekend untuk paket akhir pekan
-                </Text>
-                <Text style={styles.promoValidity}>
-                  Valid until Oct 31, 2026
-                </Text>
-              </View>
-            </View>
+            </TouchableOpacity>
           </ScrollView>
         </View>
 
@@ -280,8 +372,16 @@ export const DestinationsScreen: React.FC = () => {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Paket Wisata Populer</Text>
-              <TouchableOpacity onPress={() => router.push("/tours")}>
+              <TouchableOpacity
+                onPress={() => router.push("/tours")}
+                style={styles.seeAllButton}
+              >
                 <Text style={styles.seeAllText}>Lihat Semua</Text>
+                <Ionicons
+                  name="arrow-forward"
+                  size={16}
+                  color={Colors.accent}
+                />
               </TouchableOpacity>
             </View>
             <FlatList
@@ -300,8 +400,16 @@ export const DestinationsScreen: React.FC = () => {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Transportasi Populer</Text>
-              <TouchableOpacity onPress={() => router.push("/transportation")}>
+              <TouchableOpacity
+                onPress={() => router.push("/transportation")}
+                style={styles.seeAllButton}
+              >
                 <Text style={styles.seeAllText}>Lihat Semua</Text>
+                <Ionicons
+                  name="arrow-forward"
+                  size={16}
+                  color={Colors.accent}
+                />
               </TouchableOpacity>
             </View>
             <FlatList
@@ -330,38 +438,38 @@ export const DestinationsScreen: React.FC = () => {
                       style={styles.transportImage}
                       resizeMode="cover"
                     />
-                    <View style={styles.transportContent}>
-                      <Text style={styles.transportTitle} numberOfLines={2}>
-                        {item.name_en || item.name}
-                      </Text>
-                      <View style={styles.transportDetails}>
-                        <View style={styles.transportDetailItem}>
-                          <Ionicons
-                            name="people-outline"
-                            size={14}
-                            color="#666"
-                          />
-                          <Text style={styles.transportDetailText}>
-                            {item.capacity} orang
-                          </Text>
-                        </View>
-                        <View style={styles.transportDetailItem}>
-                          <Ionicons
-                            name="briefcase-outline"
-                            size={14}
-                            color="#666"
-                          />
-                          <Text style={styles.transportDetailText}>
-                            {item.baggage_en || item.baggage}
-                          </Text>
-                        </View>
+                    <View style={styles.transportOverlay}>
+                      <View style={styles.transportRatingBadge}>
+                        <Ionicons name="star" size={12} color="#FFB800" />
+                        <Text style={styles.transportRatingBadgeText}>
+                          {item.average_rating.toFixed(1)}
+                        </Text>
                       </View>
-                      <View style={styles.transportFooter}>
-                        <View style={styles.transportRating}>
-                          <Ionicons name="star" size={14} color="#FFB800" />
-                          <Text style={styles.transportRatingText}>
-                            {item.average_rating.toFixed(1)}
-                          </Text>
+                      <View style={styles.transportTextContainer}>
+                        <Text style={styles.transportTitle} numberOfLines={2}>
+                          {item.name_en || item.name}
+                        </Text>
+                        <View style={styles.transportDetails}>
+                          <View style={styles.transportDetailItem}>
+                            <Ionicons
+                              name="people-outline"
+                              size={12}
+                              color="#fff"
+                            />
+                            <Text style={styles.transportDetailText}>
+                              {item.capacity} orang
+                            </Text>
+                          </View>
+                          <View style={styles.transportDetailItem}>
+                            <Ionicons
+                              name="briefcase-outline"
+                              size={12}
+                              color="#fff"
+                            />
+                            <Text style={styles.transportDetailText}>
+                              {item.baggage_en || item.baggage}
+                            </Text>
+                          </View>
                         </View>
                         <Text style={styles.transportPrice}>
                           Rp {Number(item.price_idr).toLocaleString("id-ID")}
@@ -384,8 +492,16 @@ export const DestinationsScreen: React.FC = () => {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Galeri</Text>
-              <TouchableOpacity onPress={() => router.push("/gallery")}>
+              <TouchableOpacity
+                onPress={() => router.push("/gallery")}
+                style={styles.seeAllButton}
+              >
                 <Text style={styles.seeAllText}>Lihat Semua</Text>
+                <Ionicons
+                  name="arrow-forward"
+                  size={16}
+                  color={Colors.accent}
+                />
               </TouchableOpacity>
             </View>
             <View style={styles.galleryGrid}>
@@ -403,7 +519,7 @@ export const DestinationsScreen: React.FC = () => {
                       source={{
                         uri:
                           gallery.image_url ||
-                          "https://images.unsplash.com/photo-1530789253388-582c481c54b0?w=400&q=80",
+                          "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=400&q=80",
                       }}
                       style={styles.galleryImage}
                       resizeMode="cover"
@@ -428,7 +544,7 @@ export const DestinationsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#F0F3FD",
   },
   scrollView: {
     flex: 1,
@@ -520,26 +636,47 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#fff",
   },
+  // Image Indicators
+  imageIndicators: {
+    position: "absolute",
+    bottom: 20,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
+  },
+  indicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "rgba(255, 255, 255, 0.5)",
+  },
+  activeIndicator: {
+    backgroundColor: "#fff",
+    width: 24,
+  },
   // Content
   contentSection: {
-    backgroundColor: "#fff",
+    // backgroundColor: "#fff",
     padding: 24,
     marginTop: 16,
   },
   contentTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#333",
+    color: Colors.primary,
     marginBottom: 12,
   },
   contentDescription: {
     fontSize: 15,
-    color: "#666",
+    color: Colors.textSecondary,
     lineHeight: 24,
   },
   // Section
   section: {
-    backgroundColor: "#fff",
+    backgroundColor: "#F0F3FD",
     marginTop: 16,
     paddingVertical: 20,
   },
@@ -551,13 +688,18 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: "bold",
-    color: "#333",
+    color: Colors.primary,
+  },
+  seeAllButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
   },
   seeAllText: {
     fontSize: 14,
-    color: "#11468F",
+    color: Colors.accent,
     fontWeight: "600",
   },
   sliderContainer: {
@@ -566,7 +708,8 @@ const styles = StyleSheet.create({
   },
   // Packages
   packageCard: {
-    width: 240,
+    width: 300,
+    height: 300,
     backgroundColor: "#fff",
     borderRadius: 12,
     overflow: "hidden",
@@ -578,51 +721,64 @@ const styles = StyleSheet.create({
   },
   packageImage: {
     width: "100%",
-    height: 150,
+    height: "100%",
   },
-  packageContent: {
+  packageOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    justifyContent: "space-between",
     padding: 12,
+  },
+  packageTextContainer: {
+    gap: 4,
   },
   packageTitle: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 6,
+    fontWeight: "bold",
+    color: "#fff",
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   packageLocation: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    marginBottom: 8,
   },
   packageLocationText: {
-    fontSize: 13,
-    color: "#666",
+    fontSize: 12,
+    color: "#fff",
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
-  packageFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 4,
-  },
-  packageRating: {
+  packageRatingBadge: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    alignSelf: "flex-end",
   },
-  packageRatingText: {
-    fontSize: 13,
+  packageRatingBadgeText: {
+    fontSize: 12,
     fontWeight: "600",
     color: "#333",
   },
   packagePrice: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "bold",
-    color: "#11468F",
+    color: "#fff",
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   // Transportation
   transportCard: {
     width: 240,
+    height: 180,
     backgroundColor: "#fff",
     borderRadius: 12,
     overflow: "hidden",
@@ -634,21 +790,28 @@ const styles = StyleSheet.create({
   },
   transportImage: {
     width: "100%",
-    height: 150,
+    height: "100%",
   },
-  transportContent: {
+  transportOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    justifyContent: "space-between",
     padding: 12,
+  },
+  transportTextContainer: {
+    gap: 4,
   },
   transportTitle: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 8,
+    fontWeight: "bold",
+    color: "#fff",
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   transportDetails: {
     flexDirection: "row",
     gap: 12,
-    marginBottom: 8,
   },
   transportDetailItem: {
     flexDirection: "row",
@@ -656,85 +819,82 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   transportDetailText: {
-    fontSize: 12,
-    color: "#666",
+    fontSize: 11,
+    color: "#fff",
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
-  transportFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  transportRating: {
+  transportRatingBadge: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    alignSelf: "flex-end",
   },
-  transportRatingText: {
-    fontSize: 13,
+  transportRatingBadgeText: {
+    fontSize: 12,
     fontWeight: "600",
     color: "#333",
   },
   transportPrice: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "#11468F",
+    color: "#fff",
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   // Promos
   promoCard: {
     width: 300,
-    backgroundColor: "#fff",
+    height: 180,
+    backgroundColor: "#E0E7FF",
     borderRadius: 12,
     overflow: "hidden",
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
   promoImage: {
     width: "100%",
-    height: 160,
+    height: "100%",
   },
-  promoImagePlaceholder: {
-    width: "100%",
-    height: 160,
-    backgroundColor: "#f0f0f0",
-    justifyContent: "center",
-    alignItems: "center",
+  promoOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    justifyContent: "space-between",
+    padding: 12,
+  },
+  promoTextContainer: {
+    gap: 4,
+  },
+  promoTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#fff",
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+  promoSubtitle: {
+    fontSize: 13,
+    color: "#fff",
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   discountBadge: {
-    position: "absolute",
-    top: 12,
-    right: 12,
     backgroundColor: "#FF4444",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 6,
+    alignSelf: "flex-end",
   },
   discountText: {
     color: "#fff",
     fontSize: 13,
     fontWeight: "bold",
-  },
-  promoContent: {
-    padding: 12,
-  },
-  promoTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 6,
-  },
-  promoDescription: {
-    fontSize: 13,
-    color: "#666",
-    lineHeight: 18,
-    marginBottom: 8,
-  },
-  promoValidity: {
-    fontSize: 11,
-    color: "#999",
-    fontStyle: "italic",
   },
   // Galleries
   galleryGrid: {
@@ -772,5 +932,42 @@ const styles = StyleSheet.create({
     textShadowColor: "rgba(0, 0, 0, 0.75)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
+  },
+  // Category Grid
+  categoryGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    paddingHorizontal: 16,
+    gap: 12,
+  },
+  categoryCard: {
+    width: (width - 44) / 2,
+    backgroundColor: "#fff",
+    borderRadius: 24,
+    padding: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    // elevation: 2,
+    // shadowColor: "#000",
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 4,
+    borderWidth: 1,
+    borderColor: "#f0f0f0",
+  },
+  categoryIconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 24,
+    backgroundColor: "#E0E7FF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+  },
+  categoryName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+    textAlign: "center",
   },
 });

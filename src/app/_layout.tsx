@@ -1,19 +1,61 @@
 import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
+  Poppins_300Light,
+  Poppins_400Regular,
+  Poppins_500Medium,
+  Poppins_600SemiBold,
+  Poppins_700Bold,
+  useFonts,
+} from "@expo-google-fonts/poppins";
+import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";
-import React from "react";
-import { useColorScheme } from "react-native";
+import * as SplashScreen from "expo-splash-screen";
+import React, { useEffect } from "react";
+import { Text, TextInput } from "react-native";
 
 import { AnimatedSplashOverlay } from "@/components/animated-icon";
 
+// Keep splash screen visible while loading fonts
+SplashScreen.preventAutoHideAsync();
+
+// Set global default font for all Text components
+// @ts-ignore - defaultProps exists at runtime
+if (Text.defaultProps == null) {
+  // @ts-ignore
+  Text.defaultProps = {};
+}
+// @ts-ignore
+Text.defaultProps.style = { fontFamily: "Poppins_400Regular" };
+
+// Set global default font for all TextInput components
+// @ts-ignore - defaultProps exists at runtime
+if (TextInput.defaultProps == null) {
+  // @ts-ignore
+  TextInput.defaultProps = {};
+}
+// @ts-ignore
+TextInput.defaultProps.style = { fontFamily: "Poppins_400Regular" };
+
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const [fontsLoaded] = useFonts({
+    Poppins_300Light,
+    Poppins_400Regular,
+    Poppins_500Medium,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
+  });
+
+  useEffect(() => {
+    if (fontsLoaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) {
+    return null;
+  }
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={DefaultTheme}>
       <AnimatedSplashOverlay />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="home" />
@@ -28,6 +70,9 @@ export default function RootLayout() {
         <Stack.Screen name="gallery" />
         <Stack.Screen name="tours" />
         <Stack.Screen name="transportation" />
+        <Stack.Screen name="change-password" />
+        <Stack.Screen name="terms-conditions" />
+        <Stack.Screen name="booking-detail" />
       </Stack>
     </ThemeProvider>
   );

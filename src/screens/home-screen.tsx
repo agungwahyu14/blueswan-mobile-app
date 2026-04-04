@@ -11,28 +11,34 @@ const Tab = createBottomTabNavigator();
 
 export const HomeScreen: React.FC = () => {
   const scheme = useColorScheme();
-  const colors = Colors[scheme ?? "light"];
+  const colors = Colors;
 
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.accent,
+        tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textSecondary,
         tabBarStyle: {
           backgroundColor: colors.background,
-          borderTopColor: colors.backgroundElement,
-          borderTopWidth: 1,
           height: Platform.OS === "ios" ? 100 : 80,
           paddingBottom: Platform.OS === "ios" ? 30 : 15,
           paddingTop: 12,
+          borderTopWidth: 0, // Hapus garis agar lebih clean
+          elevation: 8, // Bayangan untuk Android
+          shadowColor: "#000", // Bayangan untuk iOS
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.05,
+          shadowRadius: 10,
         },
         tabBarLabelStyle: {
-          fontSize: 13,
+          fontSize: 12,
+
+          textTransform: "uppercase",
           fontWeight: "600",
         },
         tabBarIconStyle: {
-          marginTop: 4,
+          marginBottom: 2,
         },
       }}
     >

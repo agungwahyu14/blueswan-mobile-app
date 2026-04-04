@@ -1,5 +1,6 @@
 import { Colors } from "@/constants/theme";
 import { useAuthStore } from "@/store/auth-store";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
 import {
@@ -10,7 +11,6 @@ import {
   Text,
   TouchableOpacity,
   View,
-  useColorScheme,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -34,8 +34,7 @@ const ProfileRow: React.FC<ProfileRowProps> = ({ icon, label, value }) => (
 
 export const ProfileScreen: React.FC = () => {
   const { user, logout } = useAuthStore();
-  const scheme = useColorScheme();
-  const colors = Colors[scheme ?? "light"];
+  const colors = Colors;
 
   const handleEditProfile = () => {
     router.push("/edit-profile" as any);
@@ -52,6 +51,19 @@ export const ProfileScreen: React.FC = () => {
 
   const handleAbout = () => {
     router.push("/about-us" as any);
+  };
+
+  const handleLanguage = () => {
+    // TODO: Implement language selection
+    Alert.alert("Language", "Language selection coming soon");
+  };
+
+  const handleTerms = () => {
+    router.push("/terms-conditions" as any);
+  };
+
+  const handleChangePassword = () => {
+    router.push("/change-password" as any);
   };
 
   const handleLogout = () => {
@@ -95,17 +107,75 @@ export const ProfileScreen: React.FC = () => {
               <Text style={styles.verifiedText}>✓ Verified</Text>
             </View>
           )}
-
-          <TouchableOpacity
-            style={[styles.editButton, { borderColor: colors.accent }]}
-            onPress={handleEditProfile}
-          >
-            <Text style={[styles.editButtonText, { color: colors.accent }]}>
-              Edit Profile
-            </Text>
-          </TouchableOpacity>
         </View>
 
+        <TouchableOpacity
+          style={styles.personalInfoButton}
+          onPress={handleEditProfile}
+        >
+          <Ionicons name="person-outline" size={20} color="#FFFFFF" />
+          <Text style={styles.personalInfoText}>Personal Information</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuButton} onPress={handleLanguage}>
+          <Ionicons name="language-outline" size={20} color={Colors.primary} />
+          <Text style={styles.menuButtonText}>Language</Text>
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color="#999"
+            style={styles.chevronIcon}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuButton} onPress={handleAbout}>
+          <Ionicons
+            name="information-circle-outline"
+            size={20}
+            color={Colors.primary}
+          />
+          <Text style={styles.menuButtonText}>About</Text>
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color="#999"
+            style={styles.chevronIcon}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuButton} onPress={handleTerms}>
+          <Ionicons
+            name="document-text-outline"
+            size={20}
+            color={Colors.primary}
+          />
+          <Text style={styles.menuButtonText}>Terms & Conditions</Text>
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color="#999"
+            style={styles.chevronIcon}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.menuButton}
+          onPress={handleChangePassword}
+        >
+          <Ionicons
+            name="lock-closed-outline"
+            size={20}
+            color={Colors.primary}
+          />
+          <Text style={styles.menuButtonText}>Change Password</Text>
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color="#999"
+            style={styles.chevronIcon}
+          />
+        </TouchableOpacity>
+        {/* 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Personal Information</Text>
           <View style={styles.card}>
@@ -152,7 +222,7 @@ export const ProfileScreen: React.FC = () => {
           </View>
         </View> */}
 
-        <View style={styles.section}>
+        {/* <View style={styles.section}>
           <Text style={styles.sectionTitle}>Support</Text>
           <View style={styles.card}>
             <TouchableOpacity
@@ -169,13 +239,11 @@ export const ProfileScreen: React.FC = () => {
               </View>
             </TouchableOpacity>
           </View>
-        </View>
+        </View> */}
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutText}>Logout</Text>
+          <Text style={styles.logoutText}>Sign Out of Account</Text>
         </TouchableOpacity>
-
-        <Text style={styles.version}>Version 1.0.0</Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -184,14 +252,12 @@ export const ProfileScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: "#F0F3FD",
   },
   header: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F0F3FD",
     alignItems: "center",
     paddingVertical: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
   },
   avatarContainer: {
     marginBottom: 16,
@@ -307,20 +373,49 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
     marginLeft: 48,
   },
-  logoutButton: {
+  personalInfoButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.primary,
+    marginHorizontal: 16,
+    marginTop: 24,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    gap: 12,
+  },
+  personalInfoText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#FFFFFF",
+  },
+  menuButton: {
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: "#FFFFFF",
+    marginHorizontal: 16,
+    marginTop: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    gap: 12,
+  },
+  menuButtonText: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#333",
+    flex: 1,
+  },
+  chevronIcon: {
+    marginLeft: "auto",
+  },
+  logoutButton: {
+    backgroundColor: "#F4433633", // CC setara dengan 80% opacity
     marginHorizontal: 16,
     marginTop: 24,
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#F44336",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
   },
   logoutText: {
     fontSize: 16,

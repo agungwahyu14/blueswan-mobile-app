@@ -5,24 +5,19 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-    useColorScheme,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export const EditProfileScreen: React.FC = () => {
   const { user, setUser } = useAuthStore();
-  const scheme = useColorScheme();
-  const colors = Colors[scheme ?? "light"];
 
   const [name, setName] = useState(user?.name || "");
   const [email, setEmail] = useState(user?.email || "");
@@ -80,111 +75,95 @@ export const EditProfileScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.keyboardView}
-      >
-        {/* Header */}
-        <View
-          style={[
-            styles.header,
-            { borderBottomColor: colors.backgroundElement },
-          ]}
+    <SafeAreaView style={styles.container} edges={["top"]}>
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
         >
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={styles.backButton}
-          >
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>
-            Edit Profile
-          </Text>
-          <View style={styles.placeholder} />
+          <Ionicons name="arrow-back" size={24} color={Colors.primary} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Edit Profile</Text>
+        <View style={styles.placeholder} />
+      </View>
+
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Name *</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your name"
+            placeholderTextColor="#999"
+            value={name}
+            onChangeText={setName}
+            editable={!isLoading}
+          />
         </View>
 
-        <ScrollView style={styles.content}>
-          <View style={styles.form}>
-            <Text style={styles.label}>Name *</Text>
-            <TextInput
-              style={[styles.input, { borderColor: colors.backgroundElement }]}
-              placeholder="Enter your name"
-              placeholderTextColor="#999"
-              value={name}
-              onChangeText={setName}
-              editable={!isLoading}
-            />
-
-            <Text style={[styles.label, styles.labelSpaced]}>Email *</Text>
-            <TextInput
-              style={[styles.input, { borderColor: colors.backgroundElement }]}
-              placeholder="Enter your email"
-              placeholderTextColor="#999"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              editable={!isLoading}
-            />
-
-            <Text style={[styles.label, styles.labelSpaced]}>Phone Number</Text>
-            <TextInput
-              style={[styles.input, { borderColor: colors.backgroundElement }]}
-              placeholder="Enter your phone number"
-              placeholderTextColor="#999"
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
-              keyboardType="phone-pad"
-              editable={!isLoading}
-            />
-
-            <Text style={[styles.label, styles.labelSpaced]}>Nationality</Text>
-            <TextInput
-              style={[styles.input, { borderColor: colors.backgroundElement }]}
-              placeholder="Enter your nationality"
-              placeholderTextColor="#999"
-              value={nationality}
-              onChangeText={setNationality}
-              editable={!isLoading}
-            />
-
-            <Text style={[styles.label, styles.labelSpaced]}>
-              Date of Birth
-            </Text>
-            <TextInput
-              style={[styles.input, { borderColor: colors.backgroundElement }]}
-              placeholder="YYYY-MM-DD"
-              placeholderTextColor="#999"
-              value={dateOfBirth}
-              onChangeText={setDateOfBirth}
-              editable={!isLoading}
-            />
-            <Text style={styles.hint}>
-              Format: YYYY-MM-DD (e.g., 1990-01-15)
-            </Text>
-          </View>
-        </ScrollView>
-
-        {/* Save Button */}
-        <View style={styles.footer}>
-          <TouchableOpacity
-            style={[
-              styles.saveButton,
-              { backgroundColor: colors.primary },
-              isLoading && styles.buttonDisabled,
-            ]}
-            onPress={handleSave}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color="#FFFFFF" />
-            ) : (
-              <Text style={styles.saveButtonText}>Save Changes</Text>
-            )}
-          </TouchableOpacity>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Email *</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your email"
+            placeholderTextColor="#999"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            editable={!isLoading}
+          />
         </View>
-      </KeyboardAvoidingView>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Phone Number</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your phone number"
+            placeholderTextColor="#999"
+            value={phoneNumber}
+            onChangeText={setPhoneNumber}
+            keyboardType="phone-pad"
+            editable={!isLoading}
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Nationality</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your nationality"
+            placeholderTextColor="#999"
+            value={nationality}
+            onChangeText={setNationality}
+            editable={!isLoading}
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Date of Birth</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="YYYY-MM-DD"
+            placeholderTextColor="#999"
+            value={dateOfBirth}
+            onChangeText={setDateOfBirth}
+            editable={!isLoading}
+          />
+          <Text style={styles.hint}>Format: YYYY-MM-DD (e.g., 1990-01-15)</Text>
+        </View>
+
+        <TouchableOpacity
+          style={[styles.saveButton, isLoading && styles.saveButtonDisabled]}
+          onPress={handleSave}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text style={styles.saveButtonText}>Save Changes</Text>
+          )}
+        </TouchableOpacity>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -192,10 +171,7 @@ export const EditProfileScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
-  keyboardView: {
-    flex: 1,
+    backgroundColor: "#F0F3FD",
   },
   header: {
     flexDirection: "row",
@@ -203,23 +179,25 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 16,
-    borderBottomWidth: 1,
+    backgroundColor: "#F0F3FD",
   },
   backButton: {
     padding: 4,
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: "bold",
+    color: Colors.primary,
   },
   placeholder: {
     width: 32,
   },
   content: {
     flex: 1,
+    paddingHorizontal: 16,
   },
-  form: {
-    padding: 24,
+  inputContainer: {
+    marginBottom: 20,
   },
   label: {
     fontSize: 14,
@@ -227,39 +205,30 @@ const styles = StyleSheet.create({
     color: "#333",
     marginBottom: 8,
   },
-  labelSpaced: {
-    marginTop: 16,
-  },
   input: {
-    height: 52,
-    borderWidth: 1,
+    backgroundColor: "#FFFFFF",
     borderRadius: 12,
+    paddingVertical: 14,
     paddingHorizontal: 16,
     fontSize: 16,
-    backgroundColor: "#F8F8F8",
+    color: "#333",
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
   },
   hint: {
     fontSize: 12,
     color: "#999",
     marginTop: 4,
   },
-  footer: {
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#F0F0F0",
-  },
   saveButton: {
-    height: 52,
+    backgroundColor: Colors.primary,
+    paddingVertical: 16,
     borderRadius: 12,
-    justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    marginTop: 8,
+    marginBottom: 32,
   },
-  buttonDisabled: {
+  saveButtonDisabled: {
     opacity: 0.6,
   },
   saveButtonText: {

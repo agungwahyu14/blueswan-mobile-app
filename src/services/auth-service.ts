@@ -1,9 +1,9 @@
 import type {
-  AuthCredentials,
-  AuthResponse,
-  RegisterPayload,
-  UpdateUserPayload,
-  User,
+    AuthCredentials,
+    AuthResponse,
+    RegisterPayload,
+    UpdateUserPayload,
+    User,
 } from "@/types/user";
 import { apiClient } from "./api-client";
 
@@ -107,5 +107,18 @@ export const authService = {
    */
   verifyEmail: async (token: string): Promise<void> => {
     await apiClient.post<void>("/api/auth/verify-email", { token });
+  },
+
+  /**
+   * Change user password
+   */
+  changePassword: async (
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<void> => {
+    await apiClient.put<void>("/api/auth/change-password", {
+      currentPassword,
+      newPassword,
+    });
   },
 };

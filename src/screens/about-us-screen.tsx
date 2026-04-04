@@ -5,20 +5,16 @@ import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
-    Image,
     Linking,
     ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
     View,
-    useColorScheme,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export const AboutUsScreen: React.FC = () => {
-  const scheme = useColorScheme();
-  const colors = Colors[scheme ?? "light"];
   const [aboutData, setAboutData] = useState<AboutUs | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,23 +48,33 @@ export const AboutUsScreen: React.FC = () => {
     Linking.openURL("https://blueswan.com");
   };
 
+  const getValueIcon = (index: number): any => {
+    const icons = [
+      "heart-outline",
+      "shield-checkmark-outline",
+      "people-outline",
+      "leaf-outline",
+      "ribbon-outline",
+      "star-outline",
+    ];
+    return icons[index % icons.length];
+  };
+
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+      <SafeAreaView style={styles.container} edges={["top"]}>
         <View style={styles.header}>
           <TouchableOpacity
             onPress={() => router.back()}
             style={styles.backButton}
           >
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
+            <Ionicons name="arrow-back" size={24} color={Colors.primary} />
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>
-            About Us
-          </Text>
+          <Text style={styles.headerTitle}>About Us</Text>
           <View style={styles.placeholder} />
         </View>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
+          <ActivityIndicator size="large" color={Colors.primary} />
         </View>
       </SafeAreaView>
     );
@@ -76,17 +82,15 @@ export const AboutUsScreen: React.FC = () => {
 
   if (error || !aboutData) {
     return (
-      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+      <SafeAreaView style={styles.container} edges={["top"]}>
         <View style={styles.header}>
           <TouchableOpacity
             onPress={() => router.back()}
             style={styles.backButton}
           >
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
+            <Ionicons name="arrow-back" size={24} color={Colors.primary} />
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>
-            About Us
-          </Text>
+          <Text style={styles.headerTitle}>About Us</Text>
           <View style={styles.placeholder} />
         </View>
         <View style={styles.errorContainer}>
@@ -100,71 +104,52 @@ export const AboutUsScreen: React.FC = () => {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
           style={styles.backButton}
         >
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
+          <Ionicons name="arrow-back" size={24} color={Colors.primary} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>
-          {aboutData.hero_title_en}
-        </Text>
+        <Text style={styles.headerTitle}>About Us</Text>
         <View style={styles.placeholder} />
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Hero Section */}
-        {aboutData.hero_image_url && (
-          <Image
-            source={{ uri: aboutData.hero_image_url }}
-            style={styles.heroImage}
-            resizeMode="cover"
-          />
-        )}
-        <View style={styles.heroContent}>
-          <Text style={[styles.heroTitle, { color: colors.primary }]}>
-            {aboutData.hero_title_en}
-          </Text>
+        <View style={styles.heroSection}>
+          <Text style={styles.heroTitle}>{aboutData.hero_title_en}</Text>
           <Text style={styles.heroSubtitle}>{aboutData.hero_subtitle_en}</Text>
         </View>
 
         {/* Story Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{aboutData.story_title_en}</Text>
-          <View style={styles.card}>
-            {aboutData.story_image_url && (
-              <Image
-                source={{ uri: aboutData.story_image_url }}
-                style={styles.storyImage}
-                resizeMode="cover"
-              />
-            )}
-            <Text style={styles.description}>
-              {aboutData.story_description_en}
-            </Text>
-          </View>
+          <Text style={styles.description}>
+            {aboutData.story_description_en}
+          </Text>
         </View>
 
         {/* Vision & Mission */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{aboutData.vm_title_en}</Text>
-          <Text style={styles.sectionSubtitle}>{aboutData.vm_subtitle_en}</Text>
+          <Text style={styles.sectionTitle}>Vision</Text>
+          <Text style={styles.description}>{aboutData.vision_content_en}</Text>
+        </View>
 
-          <View style={styles.card}>
-            <Text style={styles.vmTitle}>{aboutData.vision_title_en}</Text>
-            <Text style={styles.description}>
-              {aboutData.vision_content_en}
-            </Text>
-          </View>
-
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Mission</Text>
           {aboutData.missions.map((mission, index) => (
-            <View key={mission.id} style={[styles.card, styles.cardSpaced]}>
-              <Text style={styles.vmTitle}>
-                {index + 1}. {mission.title_en}
-              </Text>
-              <Text style={styles.description}>{mission.description_en}</Text>
+            <View key={mission.id} style={styles.missionItem}>
+              <View style={styles.missionNumber}>
+                <Text style={styles.missionNumberText}>{index + 1}</Text>
+              </View>
+              <View style={styles.missionContent}>
+                <Text style={styles.missionTitle}>{mission.title_en}</Text>
+                <Text style={styles.missionDescription}>
+                  {mission.description_en}
+                </Text>
+              </View>
             </View>
           ))}
         </View>
@@ -172,107 +157,48 @@ export const AboutUsScreen: React.FC = () => {
         {/* Values Section */}
         {aboutData.values && aboutData.values.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{aboutData.values_title_en}</Text>
-            <Text style={styles.sectionSubtitle}>
-              {aboutData.values_subtitle_en}
-            </Text>
-
-            {aboutData.values.map((value) => (
-              <View key={value.id} style={[styles.card, styles.valueCard]}>
-                <Text style={styles.valueIcon}>{value.icon}</Text>
-                <Text style={styles.valueTitle}>{value.title_en}</Text>
-                <Text style={styles.valueDescription}>
-                  {value.description_en}
-                </Text>
+            <Text style={styles.sectionTitle}>Our Values</Text>
+            {aboutData.values.map((value, index) => (
+              <View key={value.id} style={styles.valueItem}>
+                <View style={styles.valueIconContainer}>
+                  <Ionicons
+                    name={getValueIcon(index)}
+                    size={24}
+                    color={Colors.primary}
+                  />
+                </View>
+                <View style={styles.valueContent}>
+                  <Text style={styles.valueTitle}>{value.title_en}</Text>
+                  <Text style={styles.valueDescription}>
+                    {value.description_en}
+                  </Text>
+                </View>
               </View>
             ))}
-          </View>
-        )}
-
-        {/* Stats Section */}
-        {aboutData.stats && aboutData.stats.length > 0 && (
-          <View style={styles.section}>
-            <View style={styles.statsContainer}>
-              {aboutData.stats.map((stat) => (
-                <View key={stat.id} style={styles.statCard}>
-                  <Text style={[styles.statValue, { color: colors.primary }]}>
-                    {stat.value}
-                  </Text>
-                  <Text style={styles.statLabel}>{stat.label_en}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        )}
-
-        {/* Team Section */}
-        {aboutData.team_members && aboutData.team_members.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{aboutData.team_title_en}</Text>
-            <Text style={styles.sectionSubtitle}>
-              {aboutData.team_subtitle_en}
-            </Text>
-
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.teamScroll}
-            >
-              {aboutData.team_members.map((member) => (
-                <View key={member.id} style={styles.teamCard}>
-                  {member.photo_url ? (
-                    <Image
-                      source={{ uri: member.photo_url }}
-                      style={styles.teamPhoto}
-                      resizeMode="cover"
-                    />
-                  ) : (
-                    <View
-                      style={[
-                        styles.teamPhotoPlaceholder,
-                        { backgroundColor: colors.primary },
-                      ]}
-                    >
-                      <Text style={styles.teamPhotoText}>{member.name[0]}</Text>
-                    </View>
-                  )}
-                  <Text style={styles.teamName}>{member.name}</Text>
-                  <Text style={styles.teamRole}>{member.role_en}</Text>
-                </View>
-              ))}
-            </ScrollView>
           </View>
         )}
 
         {/* Contact Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Contact Us</Text>
-          <View style={styles.card}>
-            <TouchableOpacity style={styles.contactRow} onPress={handleEmail}>
-              <Ionicons name="mail" size={24} color={colors.primary} />
-              <Text style={styles.contactText}>support@blueswan.com</Text>
-            </TouchableOpacity>
-            <View style={styles.contactDivider} />
-            <TouchableOpacity style={styles.contactRow} onPress={handlePhone}>
-              <Ionicons name="call" size={24} color={colors.primary} />
-              <Text style={styles.contactText}>+1 (234) 567-890</Text>
-            </TouchableOpacity>
-            <View style={styles.contactDivider} />
-            <TouchableOpacity style={styles.contactRow} onPress={handleWebsite}>
-              <Ionicons name="globe" size={24} color={colors.primary} />
-              <Text style={styles.contactText}>www.blueswan.com</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity style={styles.contactItem} onPress={handleEmail}>
+            <Ionicons name="mail-outline" size={20} color={Colors.primary} />
+            <Text style={styles.contactText}>support@blueswan.com</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.contactItem} onPress={handlePhone}>
+            <Ionicons name="call-outline" size={20} color={Colors.primary} />
+            <Text style={styles.contactText}>+1 (234) 567-890</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.contactItem} onPress={handleWebsite}>
+            <Ionicons name="globe-outline" size={20} color={Colors.primary} />
+            <Text style={styles.contactText}>www.blueswan.com</Text>
+          </TouchableOpacity>
         </View>
 
-        {/* Footer */}
-        <View style={styles.section}>
-          <View style={styles.card}>
-            <Text style={styles.footerText}>
-              © 2024 Blue Swan. All rights reserved.
-            </Text>
-            <Text style={styles.version}>Version 1.0.0</Text>
-          </View>
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>
+            © 2024 Blue Swan Travel. All rights reserved.
+          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -282,7 +208,7 @@ export const AboutUsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: "#F0F3FD",
   },
   loadingContainer: {
     flex: 1,
@@ -304,8 +230,8 @@ const styles = StyleSheet.create({
   retryButton: {
     paddingHorizontal: 24,
     paddingVertical: 12,
-    backgroundColor: "#11468F",
-    borderRadius: 8,
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
   },
   retryText: {
     color: "#FFFFFF",
@@ -317,217 +243,139 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
+    paddingVertical: 16,
+    backgroundColor: "#F0F3FD",
   },
   backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "flex-start",
+    padding: 4,
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: "bold",
+    color: Colors.primary,
   },
   placeholder: {
-    width: 40,
+    width: 32,
   },
   content: {
     flex: 1,
   },
-  heroImage: {
-    width: "100%",
-    height: 200,
-  },
-  heroContent: {
-    alignItems: "center",
+  heroSection: {
+    paddingHorizontal: 16,
     paddingVertical: 24,
-    backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
+    alignItems: "center",
   },
   heroTitle: {
     fontSize: 28,
     fontWeight: "bold",
-    marginBottom: 8,
+    color: Colors.primary,
     textAlign: "center",
+    marginBottom: 8,
   },
   heroSubtitle: {
     fontSize: 16,
     color: "#666",
     textAlign: "center",
+    lineHeight: 24,
   },
   section: {
-    marginTop: 24,
+    paddingHorizontal: 16,
+    marginBottom: 32,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
-    marginHorizontal: 16,
-    marginBottom: 4,
-  },
-  sectionSubtitle: {
-    fontSize: 14,
-    color: "#666",
-    marginHorizontal: 16,
-    marginBottom: 12,
-  },
-  card: {
-    backgroundColor: "#FFFFFF",
-    marginHorizontal: 16,
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  cardSpaced: {
-    marginTop: 12,
-  },
-  storyImage: {
-    width: "100%",
-    height: 180,
-    borderRadius: 8,
-    marginBottom: 12,
+    fontSize: 20,
+    fontWeight: "bold",
+    color: Colors.primary,
+    marginBottom: 16,
   },
   description: {
     fontSize: 15,
-    lineHeight: 22,
+    lineHeight: 24,
     color: "#333",
   },
-  vmTitle: {
+  missionItem: {
+    flexDirection: "row",
+    marginBottom: 20,
+  },
+  missionNumber: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  missionNumberText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+  },
+  missionContent: {
+    flex: 1,
+  },
+  missionTitle: {
     fontSize: 16,
     fontWeight: "600",
     color: "#333",
-    marginBottom: 8,
+    marginBottom: 4,
   },
-  valueCard: {
+  missionDescription: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#666",
+  },
+  valueItem: {
+    flexDirection: "row",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    alignItems: "flex-start",
+  },
+  valueIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#E8F0FE",
+    justifyContent: "center",
     alignItems: "center",
-    marginHorizontal: 16,
-    marginBottom: 12,
+    marginRight: 12,
   },
-  valueIcon: {
-    fontSize: 48,
-    marginBottom: 12,
+  valueContent: {
+    flex: 1,
   },
   valueTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "600",
     color: "#333",
-    marginBottom: 8,
-    textAlign: "center",
+    marginBottom: 4,
   },
   valueDescription: {
     fontSize: 14,
     lineHeight: 20,
     color: "#666",
-    textAlign: "center",
   },
-  statsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginHorizontal: 16,
-    gap: 12,
-  },
-  statCard: {
-    flex: 1,
-    minWidth: "45%",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 20,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  statValue: {
-    fontSize: 32,
-    fontWeight: "bold",
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 14,
-    color: "#666",
-    textAlign: "center",
-  },
-  teamScroll: {
-    marginLeft: 16,
-  },
-  teamCard: {
-    width: 140,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 12,
-    marginRight: 12,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  teamPhoto: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginBottom: 12,
-  },
-  teamPhotoPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginBottom: 12,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  teamPhotoText: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#FFFFFF",
-  },
-  teamName: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#333",
-    textAlign: "center",
-    marginBottom: 4,
-  },
-  teamRole: {
-    fontSize: 12,
-    color: "#666",
-    textAlign: "center",
-  },
-  contactRow: {
+  contactItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 12,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
   },
   contactText: {
     fontSize: 15,
     color: "#333",
     marginLeft: 12,
-    flex: 1,
   },
-  contactDivider: {
-    height: 1,
-    backgroundColor: "#F0F0F0",
+  footer: {
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+    alignItems: "center",
   },
   footerText: {
     fontSize: 13,
-    color: "#666",
-    textAlign: "center",
-    marginBottom: 8,
-  },
-  version: {
-    fontSize: 12,
     color: "#999",
     textAlign: "center",
   },

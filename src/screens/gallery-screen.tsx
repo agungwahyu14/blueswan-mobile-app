@@ -1,3 +1,4 @@
+import { Colors } from "@/constants/theme";
 import { homeService } from "@/services/home-service";
 import type { Gallery } from "@/types/home";
 import { Ionicons } from "@expo/vector-icons";
@@ -94,7 +95,7 @@ export const GalleryScreen: React.FC = () => {
           </View>
         </View>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#11468F" />
+          <ActivityIndicator size="large" color={Colors.primary} />
           <Text style={styles.loadingText}>Memuat galeri...</Text>
         </View>
       </SafeAreaView>
@@ -169,15 +170,15 @@ export const GalleryScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#F0F3FD",
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
-    backgroundColor: "#fff",
+    backgroundColor: "#F0F3FD",
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+    borderBottomColor: "#E0E0E0",
     gap: 12,
   },
   backButton: {
@@ -189,7 +190,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#333",
+    color: Colors.primary,
   },
   headerSubtitle: {
     fontSize: 14,
@@ -221,7 +222,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   retryButton: {
-    backgroundColor: "#11468F",
+    backgroundColor: Colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,

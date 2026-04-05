@@ -1,17 +1,18 @@
+import { Colors } from "@/constants/theme";
 import { transportService } from "@/services/transport-service";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -237,7 +238,7 @@ export const TransportationScreen: React.FC<TransportationScreenProps> = ({
               style={styles.backButton}
               onPress={() => router.back()}
             >
-              <Ionicons name="arrow-back" size={24} color="#333" />
+              <Ionicons name="arrow-back" size={24} color={Colors.primary} />
             </TouchableOpacity>
           )}
           <View style={styles.headerTextContainer}>
@@ -321,7 +322,7 @@ export const TransportationScreen: React.FC<TransportationScreenProps> = ({
             style={styles.backButton}
             onPress={() => router.back()}
           >
-            <Ionicons name="arrow-back" size={24} color="#333" />
+            <Ionicons name="arrow-back" size={24} color={Colors.primary} />
           </TouchableOpacity>
         )}
         <View style={styles.headerTextContainer}>
@@ -397,7 +398,7 @@ export const TransportationScreen: React.FC<TransportationScreenProps> = ({
         ListEmptyComponent={
           isLoading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#11468F" />
+              <ActivityIndicator size="large" color={Colors.primary} />
               <Text style={styles.loadingText}>Memuat transportasi...</Text>
             </View>
           ) : (
@@ -417,13 +418,13 @@ export const TransportationScreen: React.FC<TransportationScreenProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#F0F3FD",
   },
   headerSection: {
     padding: 16,
-    backgroundColor: "#fff",
+    backgroundColor: "#F0F3FD",
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+    borderBottomColor: "#E0E0E0",
   },
   backButton: {
     padding: 4,
@@ -435,7 +436,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#333",
+    color: Colors.primary,
   },
   headerSubtitle: {
     fontSize: 14,
@@ -445,8 +446,8 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f5f5f5",
-    borderRadius: 8,
+    backgroundColor: "#ffffff",
+    borderRadius: 6,
     paddingHorizontal: 12,
     marginTop: 12,
     height: 44,
@@ -473,14 +474,14 @@ const styles = StyleSheet.create({
   filterChip: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: "#f5f5f5",
+    borderRadius: 6,
+    backgroundColor: "#ffffff",
     borderWidth: 1,
     borderColor: "#e0e0e0",
   },
   filterChipActive: {
-    backgroundColor: "#11468F",
-    borderColor: "#11468F",
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
   },
   filterChipText: {
     fontSize: 13,
@@ -524,7 +525,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#333",
+    color: Colors.primary,
     marginBottom: 4,
   },
   typeContainer: {
@@ -534,7 +535,7 @@ const styles = StyleSheet.create({
   },
   type: {
     fontSize: 12,
-    color: "#11468F",
+    color: Colors.primary,
     fontWeight: "600",
   },
   ratingContainer: {
@@ -597,7 +598,7 @@ const styles = StyleSheet.create({
   priceRange: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#11468F",
+    color: Colors.primary,
   },
   bookButton: {
     backgroundColor: "#32cc0f",
@@ -646,7 +647,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   retryButton: {
-    backgroundColor: "#11468F",
+    backgroundColor: Colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,

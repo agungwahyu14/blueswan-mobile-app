@@ -67,6 +67,7 @@ export default function RootLayout() {
         <Stack.Screen name="package-detail" />
         <Stack.Screen name="transport-detail" />
         <Stack.Screen name="promo" />
+        <Stack.Screen name="promo-detail" />
         <Stack.Screen name="gallery" />
         <Stack.Screen name="tours" />
         <Stack.Screen name="transportation" />

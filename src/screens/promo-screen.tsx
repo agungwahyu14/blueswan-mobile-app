@@ -1,51 +1,124 @@
-import { homeService } from "@/services/home-service";
+import { Colors } from "@/constants/theme";
 import type { Promo } from "@/types/home";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
     FlatList,
     Image,
     StyleSheet,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+// Dummy promo data
+const DUMMY_PROMOS: Promo[] = [
+  {
+    id: "1",
+    title: "Diskon Spesial Bali",
+    title_en: "Special Bali Discount",
+    description:
+      "Dapatkan diskon hingga 30% untuk paket tour Bali. Nikmati keindahan pulau dewata dengan harga terjangkau!",
+    description_en:
+      "Get up to 30% discount for Bali tour packages. Enjoy the beauty of the island of gods at an affordable price!",
+    image_url:
+      "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&q=80",
+    discount_percentage: 30,
+    valid_from: "2026-04-01T00:00:00Z",
+    valid_until: "2026-06-30T23:59:59Z",
+    is_active: true,
+    created_at: "2026-03-15T10:00:00Z",
+    updated_at: "2026-03-15T10:00:00Z",
+  },
+  {
+    id: "2",
+    title: "Promo Raja Ampat Adventure",
+    title_en: "Raja Ampat Adventure Promo",
+    description:
+      "Jelajahi keindahan bawah laut Raja Ampat dengan diskon 25%. Limited time offer!",
+    description_en:
+      "Explore the underwater beauty of Raja Ampat with 25% discount. Limited time offer!",
+    image_url:
+      "https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=800&q=80",
+    discount_percentage: 25,
+    valid_from: "2026-04-01T00:00:00Z",
+    valid_until: "2026-07-31T23:59:59Z",
+    is_active: true,
+    created_at: "2026-03-20T10:00:00Z",
+    updated_at: "2026-03-20T10:00:00Z",
+  },
+  {
+    id: "3",
+    title: "Flash Sale Yogyakarta",
+    title_en: "Yogyakarta Flash Sale",
+    description:
+      "Hemat 20% untuk paket wisata Yogyakarta. Kunjungi Candi Borobudur dan Prambanan!",
+    description_en:
+      "Save 20% on Yogyakarta tour packages. Visit Borobudur and Prambanan Temples!",
+    image_url:
+      "https://images.unsplash.com/photo-1591843336169-15eb8e252c64?w=800&q=80",
+    discount_percentage: 20,
+    valid_from: "2026-04-01T00:00:00Z",
+    valid_until: "2026-05-31T23:59:59Z",
+    is_active: true,
+    created_at: "2026-03-25T10:00:00Z",
+    updated_at: "2026-03-25T10:00:00Z",
+  },
+  {
+    id: "4",
+    title: "Promo Honeymoon Lombok",
+    title_en: "Lombok Honeymoon Promo",
+    description:
+      "Paket spesial untuk pasangan baru! Diskon 35% untuk honeymoon di Lombok.",
+    description_en:
+      "Special package for newlyweds! 35% discount for honeymoon in Lombok.",
+    image_url:
+      "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&q=80",
+    discount_percentage: 35,
+    valid_from: "2026-04-01T00:00:00Z",
+    valid_until: "2026-08-31T23:59:59Z",
+    is_active: true,
+    created_at: "2026-03-28T10:00:00Z",
+    updated_at: "2026-03-28T10:00:00Z",
+  },
+  {
+    id: "5",
+    title: "Early Bird Komodo Island",
+    title_en: "Early Bird Komodo Island",
+    description:
+      "Booking lebih awal, hemat lebih banyak! Diskon 40% untuk tour Komodo Island.",
+    description_en:
+      "Book early, save more! 40% discount for Komodo Island tours.",
+    image_url:
+      "https://images.unsplash.com/photo-1606628015627-e0ca4d5cfacf?w=800&q=80",
+    discount_percentage: 40,
+    valid_from: "2026-04-01T00:00:00Z",
+    valid_until: "2026-06-15T23:59:59Z",
+    is_active: true,
+    created_at: "2026-04-01T10:00:00Z",
+    updated_at: "2026-04-01T10:00:00Z",
+  },
+];
 
 export const PromoScreen: React.FC = () => {
   const router = useRouter();
   const [promos, setPromos] = useState<Promo[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchPromos();
+    // Use dummy data instead of API
+    setPromos(DUMMY_PROMOS);
   }, []);
 
-  const fetchPromos = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      console.log("\n🎉 Fetching promos...");
-      const response = await homeService.getPromos();
-
-      setPromos(response.data.filter((p) => p.is_active));
-      console.log(`✅ Found ${response.data.length} promos\n`);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Gagal memuat promo";
-      setError(errorMessage);
-      console.error("❌ Error fetching promos:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const renderPromoCard = ({ item }: { item: Promo }) => (
-    <TouchableOpacity style={styles.card} activeOpacity={0.8}>
+    <TouchableOpacity
+      style={styles.card}
+      activeOpacity={0.8}
+      onPress={() => router.push(`/promo-detail?id=${item.id}` as any)}
+    >
       <Image
         source={{
           uri:
@@ -77,64 +150,11 @@ export const PromoScreen: React.FC = () => {
         </View>
 
         <TouchableOpacity style={styles.claimButton}>
-          <Text style={styles.claimButtonText}>Gunakan Promo</Text>
+          <Text style={styles.claimButtonText}>Lihat Detail</Text>
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
-
-  if (isLoading) {
-    return (
-      <SafeAreaView style={styles.container} edges={["top"]}>
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="arrow-back" size={24} color="#333" />
-          </TouchableOpacity>
-          <View style={styles.headerContent}>
-            <Text style={styles.headerTitle}>Promo Spesial</Text>
-            <Text style={styles.headerSubtitle}>
-              Jangan lewatkan penawaran menarik kami
-            </Text>
-          </View>
-        </View>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#11468F" />
-          <Text style={styles.loadingText}>Memuat promo...</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  if (error) {
-    return (
-      <SafeAreaView style={styles.container} edges={["top"]}>
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="arrow-back" size={24} color="#333" />
-          </TouchableOpacity>
-          <View style={styles.headerContent}>
-            <Text style={styles.headerTitle}>Promo Spesial</Text>
-            <Text style={styles.headerSubtitle}>
-              Jangan lewatkan penawaran menarik kami
-            </Text>
-          </View>
-        </View>
-        <View style={styles.errorContainer}>
-          <Ionicons name="alert-circle-outline" size={64} color="#ccc" />
-          <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={fetchPromos}>
-            <Text style={styles.retryButtonText}>Coba Lagi</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -143,7 +163,7 @@ export const PromoScreen: React.FC = () => {
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <Ionicons name="arrow-back" size={24} color="#333" />
+          <Ionicons name="arrow-back" size={24} color={Colors.primary} />
         </TouchableOpacity>
         <View style={styles.headerContent}>
           <Text style={styles.headerTitle}>Promo Spesial</Text>
@@ -158,8 +178,6 @@ export const PromoScreen: React.FC = () => {
         renderItem={renderPromoCard}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
-        refreshing={isLoading}
-        onRefresh={fetchPromos}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons name="pricetag-outline" size={64} color="#ccc" />
@@ -174,15 +192,15 @@ export const PromoScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#F0F3FD",
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
-    backgroundColor: "#fff",
+    backgroundColor: "#F0F3FD",
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+    borderBottomColor: "#E0E0E0",
     gap: 12,
   },
   backButton: {
@@ -194,7 +212,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#333",
+    color: Colors.primary,
   },
   headerSubtitle: {
     fontSize: 14,
@@ -226,7 +244,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   retryButton: {
-    backgroundColor: "#11468F",
+    backgroundColor: Colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
@@ -275,7 +293,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#333",
+    color: Colors.primary,
     marginBottom: 8,
   },
   cardDescription: {

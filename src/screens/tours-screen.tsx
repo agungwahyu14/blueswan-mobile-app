@@ -1,3 +1,4 @@
+import { Colors } from "@/constants/theme";
 import { categoryService } from "@/services/category-service";
 import { destinationService } from "@/services/destination-service";
 import { packageService } from "@/services/package-service";
@@ -6,9 +7,10 @@ import type { Destination } from "@/types/destination";
 import type { Package } from "@/types/package";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Animated,
   FlatList,
   Image,
   ScrollView,
@@ -120,6 +122,25 @@ export const ToursScreen: React.FC<ToursScreenProps> = ({
   const [selectedCategoryId, setSelectedCategoryId] = useState<
     string | undefined
   >();
+  const [activeTab, setActiveTab] = useState<
+    "all" | "destinations" | "categories"
+  >("all");
+
+  // Animation for tab indicator
+  const tabAnimation = useRef(new Animated.Value(0)).current;
+  const [tabBarWidth, setTabBarWidth] = useState(0);
+
+  // Animate tab indicator when activeTab changes
+  useEffect(() => {
+    const tabIndex =
+      activeTab === "all" ? 0 : activeTab === "destinations" ? 1 : 2;
+    Animated.spring(tabAnimation, {
+      toValue: tabIndex,
+      useNativeDriver: true,
+      damping: 20,
+      stiffness: 300,
+    }).start();
+  }, [activeTab]);
 
   // Fetch categories and destinations on mount
   useEffect(() => {
@@ -234,7 +255,7 @@ export const ToursScreen: React.FC<ToursScreenProps> = ({
               style={styles.backButton}
               onPress={() => router.back()}
             >
-              <Ionicons name="arrow-back" size={24} color="#333" />
+              <Ionicons name="arrow-back" size={24} color={Colors.primary} />
             </TouchableOpacity>
           )}
           <View style={styles.headerTextContainer}>
@@ -263,7 +284,7 @@ export const ToursScreen: React.FC<ToursScreenProps> = ({
             style={styles.backButton}
             onPress={() => router.back()}
           >
-            <Ionicons name="arrow-back" size={24} color="#333" />
+            <Ionicons name="arrow-back" size={24} color={Colors.primary} />
           </TouchableOpacity>
         )}
         <View style={styles.headerTextContainer}>
@@ -297,66 +318,232 @@ export const ToursScreen: React.FC<ToursScreenProps> = ({
         </View>
 
         {/* Filter Chips */}
+        {/* Animated Tab Bar */}
+        <View
+          style={styles.tabBar}
+          onLayout={(event) => {
+            const { width } = event.nativeEvent.layout;
+            setTabBarWidth(width);
+          }}
+        >
+          {tabBarWidth > 0 && (
+            <Animated.View
+              style={[
+                styles.tabIndicator,
+                {
+                  width: (tabBarWidth - 8) / 3, // Subtract padding and divide by 3 tabs
+                  transform: [
+                    {
+                      translateX: tabAnimation.interpolate({
+                        inputRange: [0, 1, 2],
+                        outputRange: [
+                          0,
+                          (tabBarWidth - 8) / 3,
+                          ((tabBarWidth - 8) / 3) * 2,
+                        ],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            />
+          )}
+          <TouchableOpacity
+            style={styles.tab}
+            onPress={() => setActiveTab("all")}
+            activeOpacity={0.7}
+          >
+            <Animated.Text
+              style={[
+                styles.tabText,
+                {
+                  color: tabAnimation.interpolate({
+                    inputRange: [0, 1, 2],
+                    outputRange: ["#fff", "#666", "#666"],
+                  }),
+                  fontWeight: activeTab === "all" ? "600" : "500",
+                },
+              ]}
+            >
+              All
+            </Animated.Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.tab}
+            onPress={() => setActiveTab("destinations")}
+            activeOpacity={0.7}
+          >
+            <Animated.Text
+              style={[
+                styles.tabText,
+                {
+                  color: tabAnimation.interpolate({
+                    inputRange: [0, 1, 2],
+                    outputRange: ["#666", "#fff", "#666"],
+                  }),
+                  fontWeight: activeTab === "destinations" ? "600" : "500",
+                },
+              ]}
+            >
+              Destinations
+            </Animated.Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.tab}
+            onPress={() => setActiveTab("categories")}
+            activeOpacity={0.7}
+          >
+            <Animated.Text
+              style={[
+                styles.tabText,
+                {
+                  color: tabAnimation.interpolate({
+                    inputRange: [0, 1, 2],
+                    outputRange: ["#666", "#666", "#fff"],
+                  }),
+                  fontWeight: activeTab === "categories" ? "600" : "500",
+                },
+              ]}
+            >
+              Categories
+            </Animated.Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Filter Content */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.filterScroll}
           contentContainerStyle={styles.filterContainer}
         >
-          {/* Destination Filters */}
-          {destinations.map((destination) => (
-            <TouchableOpacity
-              key={destination.id}
-              style={[
-                styles.filterChip,
-                selectedDestinationId === destination.id &&
-                  styles.filterChipActive,
-              ]}
-              onPress={() =>
-                setSelectedDestinationId(
-                  selectedDestinationId === destination.id
-                    ? undefined
-                    : destination.id,
-                )
-              }
-            >
-              <Text
-                style={[
-                  styles.filterChipText,
-                  selectedDestinationId === destination.id &&
-                    styles.filterChipTextActive,
-                ]}
-              >
-                📍 {destination.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
+          {activeTab === "all" && (
+            <>
+              {/* Destination Filters */}
+              {destinations.slice(0, 5).map((destination) => (
+                <TouchableOpacity
+                  key={destination.id}
+                  style={[
+                    styles.filterChip,
+                    selectedDestinationId === destination.id &&
+                      styles.filterChipActive,
+                  ]}
+                  onPress={() =>
+                    setSelectedDestinationId(
+                      selectedDestinationId === destination.id
+                        ? undefined
+                        : destination.id,
+                    )
+                  }
+                >
+                  <Text
+                    style={[
+                      styles.filterChipText,
+                      selectedDestinationId === destination.id &&
+                        styles.filterChipTextActive,
+                    ]}
+                  >
+                    📍 {destination.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
 
-          {/* Category Filters */}
-          {categories.map((category) => (
-            <TouchableOpacity
-              key={category.id}
-              style={[
-                styles.filterChip,
-                selectedCategoryId === category.id && styles.filterChipActive,
-              ]}
-              onPress={() =>
-                setSelectedCategoryId(
-                  selectedCategoryId === category.id ? undefined : category.id,
-                )
-              }
-            >
-              <Text
-                style={[
-                  styles.filterChipText,
-                  selectedCategoryId === category.id &&
-                    styles.filterChipTextActive,
-                ]}
-              >
-                {category.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
+              {/* Category Filters */}
+              {categories.slice(0, 5).map((category) => (
+                <TouchableOpacity
+                  key={category.id}
+                  style={[
+                    styles.filterChip,
+                    selectedCategoryId === category.id &&
+                      styles.filterChipActive,
+                  ]}
+                  onPress={() =>
+                    setSelectedCategoryId(
+                      selectedCategoryId === category.id
+                        ? undefined
+                        : category.id,
+                    )
+                  }
+                >
+                  <Text
+                    style={[
+                      styles.filterChipText,
+                      selectedCategoryId === category.id &&
+                        styles.filterChipTextActive,
+                    ]}
+                  >
+                    {category.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </>
+          )}
+
+          {activeTab === "destinations" && (
+            <>
+              {/* Destination Filters */}
+              {destinations.map((destination) => (
+                <TouchableOpacity
+                  key={destination.id}
+                  style={[
+                    styles.filterChip,
+                    selectedDestinationId === destination.id &&
+                      styles.filterChipActive,
+                  ]}
+                  onPress={() =>
+                    setSelectedDestinationId(
+                      selectedDestinationId === destination.id
+                        ? undefined
+                        : destination.id,
+                    )
+                  }
+                >
+                  <Text
+                    style={[
+                      styles.filterChipText,
+                      selectedDestinationId === destination.id &&
+                        styles.filterChipTextActive,
+                    ]}
+                  >
+                    📍 {destination.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </>
+          )}
+
+          {activeTab === "categories" && (
+            <>
+              {/* Category Filters */}
+              {categories.map((category) => (
+                <TouchableOpacity
+                  key={category.id}
+                  style={[
+                    styles.filterChip,
+                    selectedCategoryId === category.id &&
+                      styles.filterChipActive,
+                  ]}
+                  onPress={() =>
+                    setSelectedCategoryId(
+                      selectedCategoryId === category.id
+                        ? undefined
+                        : category.id,
+                    )
+                  }
+                >
+                  <Text
+                    style={[
+                      styles.filterChipText,
+                      selectedCategoryId === category.id &&
+                        styles.filterChipTextActive,
+                    ]}
+                  >
+                    {category.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </>
+          )}
         </ScrollView>
       </View>
 
@@ -370,7 +557,7 @@ export const ToursScreen: React.FC<ToursScreenProps> = ({
         ListEmptyComponent={
           isLoading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#11468F" />
+              <ActivityIndicator size="large" color={Colors.primary} />
             </View>
           ) : (
             <View style={styles.emptyContainer}>
@@ -387,7 +574,7 @@ export const ToursScreen: React.FC<ToursScreenProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#F0F3FD",
   },
   header: {
     flexDirection: "row",
@@ -395,9 +582,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingHorizontal: 16,
     paddingBottom: 12,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+    backgroundColor: "#F0F3FD",
     gap: 12,
   },
   backButton: {
@@ -409,14 +594,14 @@ const styles = StyleSheet.create({
   searchAndFilterContainer: {
     paddingHorizontal: 16,
     paddingBottom: 12,
-    backgroundColor: "#fff",
+    backgroundColor: "#F0F3FD",
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+    borderBottomColor: "#E0E0E0",
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#333",
+    color: Colors.primary,
   },
   headerSubtitle: {
     fontSize: 14,
@@ -426,8 +611,8 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f5f5f5",
-    borderRadius: 8,
+    backgroundColor: "#ffffff",
+    borderRadius: 6,
     paddingHorizontal: 12,
     marginBottom: 12,
     height: 44,
@@ -450,17 +635,54 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingRight: 16,
   },
+  tabBar: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    borderRadius: 6,
+    padding: 4,
+    marginBottom: 12,
+    position: "relative",
+  },
+  tabIndicator: {
+    position: "absolute",
+    top: 4,
+    left: 4,
+    height: 32, // Fixed height for the indicator
+    backgroundColor: Colors.primary,
+    borderRadius: 6,
+    zIndex: 0,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    alignItems: "center",
+    zIndex: 1,
+  },
+  tabActive: {
+    backgroundColor: "transparent",
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#666",
+  },
+  tabTextActive: {
+    color: "#fff",
+    fontWeight: "600",
+  },
   filterChip: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: "#f5f5f5",
+    borderRadius: 6,
+    backgroundColor: "#ffffff",
     borderWidth: 1,
     borderColor: "#e0e0e0",
   },
   filterChipActive: {
-    backgroundColor: "#11468F",
-    borderColor: "#11468F",
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
   },
   filterChipText: {
     fontSize: 13,
@@ -509,7 +731,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#333",
+    color: Colors.primary,
     marginBottom: 6,
   },
   destinationRow: {
@@ -580,7 +802,7 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#11468F",
+    color: Colors.primary,
   },
   loadingContainer: {
     padding: 40,
@@ -609,7 +831,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   retryButton: {
-    backgroundColor: "#11468F",
+    backgroundColor: Colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,

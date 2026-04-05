@@ -12,8 +12,6 @@ import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import { Text, TextInput } from "react-native";
 
-import { AnimatedSplashOverlay } from "@/components/animated-icon";
-
 // Keep splash screen visible while loading fonts
 SplashScreen.preventAutoHideAsync();
 
@@ -36,7 +34,7 @@ if (TextInput.defaultProps == null) {
 TextInput.defaultProps.style = { fontFamily: "Poppins_400Regular" };
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     Poppins_300Light,
     Poppins_400Regular,
     Poppins_500Medium,
@@ -45,19 +43,19 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (fontsLoaded) {
+    if (fontsLoaded || fontError) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded]);
+  }, [fontsLoaded, fontError]);
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded && !fontError) {
     return null;
   }
 
   return (
     <ThemeProvider value={DefaultTheme}>
-      <AnimatedSplashOverlay />
       <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
         <Stack.Screen name="home" />
         <Stack.Screen name="login" />
         <Stack.Screen name="register" />

@@ -1,13 +1,23 @@
-import { useAuthStore } from "@/store/auth-store";
 import { Redirect } from "expo-router";
+import React, { useEffect, useState } from "react";
 
 export default function Index() {
-  const { isAuthenticated } = useAuthStore();
+  const [isReady, setIsReady] = useState(false);
 
-  // Redirect based on authentication status
-  if (isAuthenticated) {
-    return <Redirect href="/home" />;
+  useEffect(() => {
+    // Small delay to ensure everything is initialized
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Wait for initialization
+  if (!isReady) {
+    return null;
   }
 
-  return <Redirect href="/login" />;
+  // Redirect to home page (accessible without login)
+  return <Redirect href="/home" />;
 }

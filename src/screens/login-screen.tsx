@@ -4,17 +4,17 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -62,6 +62,20 @@ export const LoginScreen: React.FC = () => {
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
+          {/* Back Button */}
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => {
+              if (router.canGoBack()) {
+                router.back();
+              } else {
+                router.replace("/home");
+              }
+            }}
+          >
+            <Ionicons name="arrow-back" size={24} color={Colors.primary} />
+          </TouchableOpacity>
+
           <View style={styles.content}>
             {/* Logo Section */}
             <View style={styles.logoSection}>
@@ -176,6 +190,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
+  },
+  backButton: {
+    paddingLeft: 24,
+    paddingTop: 16,
+    paddingBottom: 8,
   },
   keyboardView: {
     flex: 1,

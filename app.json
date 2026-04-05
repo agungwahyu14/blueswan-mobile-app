@@ -23,16 +23,20 @@
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
+    "splash": {
+      "image": "./assets/images/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#11468F"
+    },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
-          "android": {
-            "image": "./assets/images/splash-icon.png",
-            "imageWidth": 76
-          }
+          "backgroundColor": "#11468F",
+          "image": "./assets/images/logo.png",
+          "imageWidth": 200,
+          "resizeMode": "contain"
         }
       ]
     ],

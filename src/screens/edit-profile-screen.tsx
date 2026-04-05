@@ -3,7 +3,7 @@ import { authService } from "@/services/auth-service";
 import { useAuthStore } from "@/store/auth-store";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -17,7 +17,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export const EditProfileScreen: React.FC = () => {
-  const { user, setUser } = useAuthStore();
+  const { user, setUser, isAuthenticated } = useAuthStore();
 
   const [name, setName] = useState(user?.name || "");
   const [email, setEmail] = useState(user?.email || "");
@@ -29,6 +29,19 @@ export const EditProfileScreen: React.FC = () => {
       : "",
   );
   const [isLoading, setIsLoading] = useState(false);
+
+  // Check authentication on mount
+  useEffect(() => {
+    if (!isAuthenticated) {
+      console.log("🔒 User not authenticated, redirecting to login...");
+      router.replace("/login" as any);
+    }
+  }, [isAuthenticated]);
+
+  // Don't render if not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const handleSave = async () => {
     if (!name || !email) {

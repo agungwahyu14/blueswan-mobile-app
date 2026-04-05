@@ -2,7 +2,7 @@ import { Colors } from "@/constants/theme";
 import { useAuthStore } from "@/store/auth-store";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Alert,
   Image,
@@ -33,8 +33,21 @@ const ProfileRow: React.FC<ProfileRowProps> = ({ icon, label, value }) => (
 );
 
 export const ProfileScreen: React.FC = () => {
-  const { user, logout } = useAuthStore();
+  const { user, logout, isAuthenticated } = useAuthStore();
   const colors = Colors;
+
+  // Check authentication on mount
+  useEffect(() => {
+    if (!isAuthenticated) {
+      console.log("🔒 User not authenticated, redirecting to login...");
+      router.replace("/login" as any);
+    }
+  }, [isAuthenticated]);
+
+  // Don't render if not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const handleEditProfile = () => {
     router.push("/edit-profile" as any);

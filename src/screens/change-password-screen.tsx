@@ -1,8 +1,9 @@
 import { Colors } from "@/constants/theme";
 import { authService } from "@/services/auth-service";
+import { useAuthStore } from "@/store/auth-store";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
@@ -16,6 +17,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ChangePasswordScreen() {
+  const { isAuthenticated } = useAuthStore();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -23,6 +25,19 @@ export default function ChangePasswordScreen() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Check authentication on mount
+  useEffect(() => {
+    if (!isAuthenticated) {
+      console.log("🔒 User not authenticated, redirecting to login...");
+      router.replace("/login" as any);
+    }
+  }, [isAuthenticated]);
+
+  // Don't render if not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const handleChangePassword = async () => {
     // Validation

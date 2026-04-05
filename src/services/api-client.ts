@@ -9,10 +9,10 @@ const getApiBaseUrl = () => {
   if (__DEV__) {
     // Development environment
     if (Platform.OS === "android") {
-      return "http://192.168.1.3:3000"; // Android emulator
+      return "http://192.168.18.14:3000"; // Android emulator
       // Atau gunakan IP lokal: return "http://192.168.x.x:3000";
     }
-    return "http://192.168.1.3:3000"; // iOS simulator atau web
+    return "http://192.168.18.14:3000"; // iOS simulator atau web
   }
   // Production environment
   return "https://api.blueswan.com"; // Ganti dengan production URL

@@ -76,7 +76,11 @@ export const RegisterScreen: React.FC = () => {
   };
 
   const handleLogin = () => {
-    router.back();
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace("/login");
+    }
   };
 
   return (
@@ -90,6 +94,20 @@ export const RegisterScreen: React.FC = () => {
           keyboardShouldPersistTaps="handled"
           style={styles.scrollView}
         >
+          {/* Back Button */}
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => {
+              if (router.canGoBack()) {
+                router.back();
+              } else {
+                router.replace("/login");
+              }
+            }}
+          >
+            <Ionicons name="arrow-back" size={24} color={Colors.primary} />
+          </TouchableOpacity>
+
           <View style={styles.content}>
             {/* Logo Section */}
             <View style={styles.logoSection}>
@@ -309,6 +327,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
+  },
+  backButton: {
+    paddingLeft: 24,
+    paddingTop: 16,
+    paddingBottom: 8,
   },
   keyboardView: {
     flex: 1,

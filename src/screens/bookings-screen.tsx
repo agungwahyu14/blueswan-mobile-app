@@ -1,4 +1,5 @@
 import { Colors } from "@/constants/theme";
+import { useAuthStore } from "@/store/auth-store";
 import { useBookingStore } from "@/store/booking-store";
 import type { Booking } from "@/types/booking";
 import { router } from "expo-router";
@@ -296,6 +297,21 @@ export const BookingsScreen: React.FC = () => {
     fetchMyBookings,
     fetchUpcomingBookings,
   } = useBookingStore();
+
+  const { isAuthenticated } = useAuthStore();
+
+  // Check authentication on mount
+  useEffect(() => {
+    if (!isAuthenticated) {
+      console.log("🔒 User not authenticated, redirecting to login...");
+      router.replace("/login" as any);
+    }
+  }, [isAuthenticated]);
+
+  // Don't render if not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
 
   // Use dummy data for now
   const displayBookings = DUMMY_BOOKINGS;

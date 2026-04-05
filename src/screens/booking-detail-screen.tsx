@@ -1,8 +1,9 @@
 import { Colors } from "@/constants/theme";
+import { useAuthStore } from "@/store/auth-store";
 import type { Booking } from "@/types/booking";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 import {
     Image,
     ScrollView,
@@ -218,6 +219,20 @@ const getStatusText = (status: string): string => {
 export default function BookingDetailScreen() {
   const params = useLocalSearchParams();
   const bookingId = params.id as string;
+  const { isAuthenticated } = useAuthStore();
+
+  // Check authentication on mount
+  useEffect(() => {
+    if (!isAuthenticated) {
+      console.log("🔒 User not authenticated, redirecting to login...");
+      router.replace("/login" as any);
+    }
+  }, [isAuthenticated]);
+
+  // Don't render if not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const booking = DUMMY_BOOKINGS.find((b) => b.id === bookingId);
 

@@ -113,22 +113,34 @@ export const useAuthStore = create<AuthStore>()(
           error: null,
         });
 
-        // Only call API if token exists
+        // Clear API client token
+        apiClient.setAuthToken(null);
+
+        // Clear all AsyncStorage cache
+        try {
+          await AsyncStorage.multiRemove(["auth-storage"]);
+          console.log("✅ Cache cleared successfully");
+        } catch (error) {
+          console.error("❌ Failed to clear cache:", error);
+        }
+
+        // Only call API logout if token exists
         if (token) {
           try {
             // Temporarily set token for logout API call
             apiClient.setAuthToken(token);
             await authService.logout();
+            console.log("✅ Logout API call successful");
           } catch (error) {
             // Silently handle logout errors - state already cleared
             console.log(
-              "Logout API call failed, but local state cleared:",
+              "⚠️ Logout API call failed, but local state cleared:",
               error,
             );
+          } finally {
+            // Ensure token is cleared again
+            apiClient.setAuthToken(null);
           }
-        } else {
-          // No token, just clear from apiClient
-          apiClient.setAuthToken(null);
         }
       },
 

@@ -26,6 +26,7 @@ Dokumentasi perbandingan struktur file dan implementasi antara **Zustand** (yang
 ### File Contents - Zustand
 
 #### **`/src/store/index.ts`**
+
 ```typescript
 // Simple re-export
 export { useAuthStore } from "./auth-store";
@@ -34,6 +35,7 @@ export { useExploreStore } from "./explore-store";
 ```
 
 #### **`/src/store/auth-store.ts`**
+
 ```typescript
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
@@ -58,7 +60,7 @@ interface AuthActions {
     fullName: string,
     email: string,
     password: string,
-    phone: string
+    phone: string,
   ) => Promise<void>;
   logout: () => Promise<void>;
   refreshAuth: () => Promise<void>;
@@ -118,18 +120,19 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       clearError: () => set({ error: null }),
-      
+
       setUser: (user: User) => set({ user }),
     }),
     {
       name: "auth-storage",
       storage: createJSONStorage(() => AsyncStorage),
-    }
-  )
+    },
+  ),
 );
 ```
 
 #### **`/src/store/booking-store.ts`**
+
 ```typescript
 import { create } from "zustand";
 import { bookingService } from "@/services/booking-service";
@@ -148,7 +151,7 @@ interface BookingActions {
   createBooking: (
     tourPackageId: string,
     startDate: string,
-    numberOfTravelers: number
+    numberOfTravelers: number,
   ) => Promise<Booking>;
   clearError: () => void;
 }
@@ -201,6 +204,7 @@ export const useBookingStore = create<BookingStore>((set) => ({
 ```
 
 #### **Usage in Component - Zustand**
+
 ```typescript
 import { useAuthStore } from "@/store";
 
@@ -261,6 +265,7 @@ function LoginScreen() {
 ### File Contents - Redux
 
 #### **`/src/store/store.ts`**
+
 ```typescript
 import { configureStore } from "@reduxjs/toolkit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -309,6 +314,7 @@ export type AppDispatch = typeof store.dispatch;
 ```
 
 #### **`/src/store/hooks.ts`**
+
 ```typescript
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
 import type { RootState, AppDispatch } from "./store";
@@ -319,6 +325,7 @@ export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 ```
 
 #### **`/src/store/slices/authSlice.ts`**
+
 ```typescript
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { authService } from "@/services/auth-service";
@@ -349,17 +356,17 @@ export const loginThunk = createAsyncThunk(
   "auth/login",
   async (
     credentials: { email: string; password: string },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       const response = await authService.login(credentials);
       return response;
     } catch (error) {
       return rejectWithValue(
-        error instanceof Error ? error.message : "Login failed"
+        error instanceof Error ? error.message : "Login failed",
       );
     }
-  }
+  },
 );
 
 export const registerThunk = createAsyncThunk(
@@ -371,17 +378,17 @@ export const registerThunk = createAsyncThunk(
       password: string;
       phone: string;
     },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       const response = await authService.register(payload);
       return response;
     } catch (error) {
       return rejectWithValue(
-        error instanceof Error ? error.message : "Registration failed"
+        error instanceof Error ? error.message : "Registration failed",
       );
     }
-  }
+  },
 );
 
 export const logoutThunk = createAsyncThunk("auth/logout", async () => {
@@ -396,10 +403,10 @@ export const getCurrentUserThunk = createAsyncThunk(
       return user;
     } catch (error) {
       return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to get user"
+        error instanceof Error ? error.message : "Failed to get user",
       );
     }
-  }
+  },
 );
 
 // 4. Create Slice
@@ -431,7 +438,7 @@ const authSlice = createSlice({
           state.refreshToken = action.payload.refreshToken;
           state.isAuthenticated = true;
           state.error = null;
-        }
+        },
       )
       .addCase(loginThunk.rejected, (state, action) => {
         state.isLoading = false;
@@ -452,7 +459,7 @@ const authSlice = createSlice({
           state.token = action.payload.token;
           state.refreshToken = action.payload.refreshToken;
           state.isAuthenticated = true;
-        }
+        },
       )
       .addCase(registerThunk.rejected, (state, action) => {
         state.isLoading = false;
@@ -478,7 +485,7 @@ const authSlice = createSlice({
         (state, action: PayloadAction<User>) => {
           state.isLoading = false;
           state.user = action.payload;
-        }
+        },
       )
       .addCase(getCurrentUserThunk.rejected, (state, action) => {
         state.isLoading = false;
@@ -493,6 +500,7 @@ export default authSlice.reducer;
 ```
 
 #### **`/src/store/slices/bookingSlice.ts`**
+
 ```typescript
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { bookingService } from "@/services/booking-service";
@@ -521,10 +529,10 @@ export const fetchMyBookingsThunk = createAsyncThunk(
       return response.data;
     } catch (error) {
       return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to fetch bookings"
+        error instanceof Error ? error.message : "Failed to fetch bookings",
       );
     }
-  }
+  },
 );
 
 export const createBookingThunk = createAsyncThunk(
@@ -535,17 +543,17 @@ export const createBookingThunk = createAsyncThunk(
       startDate: string;
       numberOfTravelers: number;
     },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       const booking = await bookingService.createBooking(payload);
       return booking;
     } catch (error) {
       return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to create booking"
+        error instanceof Error ? error.message : "Failed to create booking",
       );
     }
-  }
+  },
 );
 
 // Slice
@@ -572,7 +580,7 @@ const bookingSlice = createSlice({
         (state, action: PayloadAction<Booking[]>) => {
           state.isLoading = false;
           state.bookings = action.payload;
-        }
+        },
       )
       .addCase(fetchMyBookingsThunk.rejected, (state, action) => {
         state.isLoading = false;
@@ -591,7 +599,7 @@ const bookingSlice = createSlice({
           state.isLoading = false;
           state.bookings.push(action.payload);
           state.currentBooking = action.payload;
-        }
+        },
       )
       .addCase(createBookingThunk.rejected, (state, action) => {
         state.isLoading = false;
@@ -605,6 +613,7 @@ export default bookingSlice.reducer;
 ```
 
 #### **`App.tsx` - Redux Provider Setup**
+
 ```typescript
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
@@ -622,13 +631,14 @@ export default function App() {
 ```
 
 #### **Usage in Component - Redux**
+
 ```typescript
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { loginThunk, clearError } from "@/store/slices/authSlice";
 
 function LoginScreen() {
   const dispatch = useAppDispatch();
-  
+
   // Select state from store
   const { user, isLoading, error } = useAppSelector((state) => state.auth);
 
@@ -638,7 +648,7 @@ function LoginScreen() {
       const result = await dispatch(
         loginThunk({ email, password })
       ).unwrap();
-      
+
       router.push("/home");
     } catch (err) {
       console.error("Login failed:", err);
@@ -690,6 +700,7 @@ Total Files: 8+
 ### **Adding a New Action**
 
 #### **Zustand - Add "updateProfile" action:**
+
 ```typescript
 // Just add to the store object
 updateProfile: async (payload: UpdateUserPayload) => {
@@ -700,12 +711,13 @@ updateProfile: async (payload: UpdateUserPayload) => {
   } catch (error) {
     set({ error: error.message, isLoading: false });
   }
-}
+};
 ```
 
 **Total: ~10 lines dalam 1 file**
 
 #### **Redux - Add "updateProfile" action:**
+
 ```typescript
 // 1. Create async thunk
 export const updateProfileThunk = createAsyncThunk(
@@ -717,7 +729,7 @@ export const updateProfileThunk = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 // 2. Add to extraReducers
@@ -741,15 +753,15 @@ builder
 
 ## 📈 Complexity Metrics
 
-| Metric | Zustand | Redux (RTK) |
-|--------|---------|-------------|
-| **Files per feature** | 1 | 1 (slice) |
-| **Lines of code** | ~100-150 | ~180-250 |
-| **Boilerplate** | Minimal | Moderate |
-| **Learning curve** | Low | Medium |
-| **Type safety** | Excellent | Excellent |
-| **Bundle size** | ~1KB | ~50KB |
-| **Setup time** | 5 min | 20 min |
+| Metric                | Zustand   | Redux (RTK) |
+| --------------------- | --------- | ----------- |
+| **Files per feature** | 1         | 1 (slice)   |
+| **Lines of code**     | ~100-150  | ~180-250    |
+| **Boilerplate**       | Minimal   | Moderate    |
+| **Learning curve**    | Low       | Medium      |
+| **Type safety**       | Excellent | Excellent   |
+| **Bundle size**       | ~1KB      | ~50KB       |
+| **Setup time**        | 5 min     | 20 min      |
 
 ---
 
@@ -758,11 +770,13 @@ builder
 Jika suatu hari perlu migrasi ke Redux, ini langkah-langkahnya:
 
 ### **Step 1: Install Dependencies**
+
 ```bash
 npm install @reduxjs/toolkit react-redux redux-persist
 ```
 
 ### **Step 2: Create Store Structure**
+
 ```bash
 mkdir -p src/store/slices
 touch src/store/store.ts
@@ -770,6 +784,7 @@ touch src/store/hooks.ts
 ```
 
 ### **Step 3: Move State Logic**
+
 ```typescript
 // Convert Zustand store → Redux slice
 // From: src/store/auth-store.ts
@@ -777,6 +792,7 @@ touch src/store/hooks.ts
 ```
 
 ### **Step 4: Update Imports**
+
 ```typescript
 // Old (Zustand)
 import { useAuthStore } from "@/store";
@@ -791,6 +807,7 @@ const user = useAppSelector((state) => state.auth.user);
 ```
 
 ### **Step 5: Add Provider**
+
 ```typescript
 // App.tsx
 <Provider store={store}>
@@ -805,18 +822,20 @@ const user = useAppSelector((state) => state.auth.user);
 ## 💡 Recommendation
 
 ### **Keep Zustand jika:**
+
 ✅ App size < 50 screens  
 ✅ State complexity rendah-medium  
 ✅ Team size kecil (1-5 devs)  
 ✅ Performance critical (mobile)  
-✅ Simple requirements  
+✅ Simple requirements
 
 ### **Migrasi ke Redux jika:**
+
 ⚠️ App growth > 100 screens  
 ⚠️ Complex state interactions  
 ⚠️ Large team (5+ devs)  
 ⚠️ Perlu advanced debugging  
-⚠️ Enterprise requirements  
+⚠️ Enterprise requirements
 
 ---
 
